@@ -1,5 +1,10 @@
+import DoctorDashboard from "./components/doctor";
+import PatientDashboard from "./components/patient";
+
 const Dashboard = () => {
-  return <div></div>;
+  const userRole = "DOCTOR";
+
+  return userRole === "DOCTOR" ? <DoctorDashboard /> : <PatientDashboard />;
 };
 
 export default Dashboard;
