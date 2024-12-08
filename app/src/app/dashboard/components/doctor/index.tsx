@@ -14,6 +14,7 @@ import {
   User,
 } from "lucide-react";
 import ProfilePopUp from "../profilePopUp";
+import Link from "next/link";
 
 export default function DoctorDashboard() {
   return (
@@ -109,7 +110,8 @@ export default function DoctorDashboard() {
                       lastVisit: "2023-05-11",
                     },
                   ].map((patient) => (
-                    <div
+                    <Link
+                      href={`/patient/${patient.id}`}
                       key={patient.id}
                       className="flex items-center justify-between py-4 border-b last:border-0"
                     >
@@ -131,11 +133,11 @@ export default function DoctorDashboard() {
                         >
                           {patient.status}
                         </Badge>
-                        <Button variant="ghost" size="icon">
+                        <div>
                           <ChevronRight className="h-4 w-4" />
-                        </Button>
+                        </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </ScrollArea>
               </TabsContent>
