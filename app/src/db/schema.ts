@@ -8,8 +8,8 @@ import {
   } from "drizzle-orm/pg-core";
   
   // Enums
-  export const userRoleEnum = pgEnum("UserRole", ["DOCTOR", "PATIENT"]);
-  export const specializationEnum = pgEnum("Specialization", [
+  export const userRoleEnum = pgEnum("user_role", ["DOCTOR", "PATIENT"]);
+  export const specializationEnum = pgEnum("specialization", [
     "INTERNAL_MEDICINE",
     "FAMILY_MEDICINE",
     "DERMATOLOGY",
@@ -18,14 +18,14 @@ import {
     "PEDIATRICS",
     "ORTHOPEDICS",
   ]);
-  export const availabilityEnum = pgEnum("Availability", [
+  export const availabilityEnum = pgEnum("availability", [
     "ONLINE",
     "OFFLINE",
     "BUSY",
   ]);
-  export const genderEnum = pgEnum("Gender", ["MALE", "FEMALE"]);
+  export const genderEnum = pgEnum("gender", ["MALE", "FEMALE"]);
 
-  export const areaEnum = pgEnum("Area", [
+  export const areaEnum = pgEnum("area", [
     "UNSKO_SANSKI",
     "POSAVSKI",
     "TUZLANSKI",
@@ -38,12 +38,12 @@ import {
     "CANTON_10",
   ]);
   
-  export const appointmentStatusEnum = pgEnum("AppointmentStatus", [
+  export const appointmentStatusEnum = pgEnum("appointmentStatus", [
     "SCHEDULED",
     "COMPLETED",
     "CANCELED",
   ]);
-  export const recordTypeEnum = pgEnum("RecordType", [
+  export const recordTypeEnum = pgEnum("record_type", [
     "DIAGNOSIS",
     "TREATMENT",
     "PRESCRIPTION",
@@ -51,7 +51,7 @@ import {
   ]);
   
   // Tables
-  export const usersTable = pgTable("User", {
+  export const usersTable = pgTable("user", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     role: userRoleEnum(),
     firstName: varchar("first_name", { length: 256 }).notNull(),
@@ -65,7 +65,7 @@ import {
     updatedAt: timestamp("updated_at").notNull(),
   });
   
-  export const doctorsTable = pgTable("Doctor", {
+  export const doctorsTable = pgTable("doctor", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     userId: integer("user_id").references(() => usersTable.id),
     medicalLicense: varchar("medical_license", { length: 256 }).notNull().unique(),
@@ -78,7 +78,7 @@ import {
     updatedAt: timestamp("updated_at").notNull(),
   });
   
-  export const patientsTable = pgTable("Patient", {
+  export const patientsTable = pgTable("patient", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     userId: integer("user_id").references(() => usersTable.id),
     dateOfBirth: timestamp("date_of_birth"),
@@ -91,7 +91,7 @@ import {
     updatedAt: timestamp("updated_at").notNull(),
   });
   
-  export const appointmentsTable = pgTable("Appointment", {
+  export const appointmentsTable = pgTable("appointment", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     patientId: integer("patient_id").references(() => patientsTable.id),
     doctorId: integer("doctor_id").references(() => doctorsTable.id),
@@ -102,7 +102,7 @@ import {
     updatedAt: timestamp("updated_at").notNull(),
   });
   
-  export const healthRecordsTable = pgTable("HealthRecords", {
+  export const healthRecordsTable = pgTable("health_records", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     userId: integer("user_id").references(() => patientsTable.id),
     type: recordTypeEnum(),
@@ -112,7 +112,7 @@ import {
     updatedAt: timestamp("updated_at").notNull(),
   });
   
-  export const questionsTable = pgTable("Questions", {
+  export const questionsTable = pgTable("questions", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     doctorId: integer("doctor_id").references(() => doctorsTable.id),
     patientId: integer("patient_id").references(() => patientsTable.id),
@@ -122,7 +122,7 @@ import {
     updatedAt: timestamp("updated_at").notNull(),
   });
   
-  export const patientResponsesTable = pgTable("PatientResponses", {
+  export const patientResponsesTable = pgTable("patient_responses", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     patientId: integer("patient_id").references(() => patientsTable.id),
     appointmentId: integer("appointment_id").references(() => appointmentsTable.id),
@@ -130,7 +130,7 @@ import {
     createdAt: timestamp("created_at").notNull(),
   });
   
-  export const videoCallsTable = pgTable("VideoCall", {
+  export const videoCallsTable = pgTable("video_call", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     patientId: integer("patient_id").references(() => patientsTable.id),
     doctorId: integer("doctor_id").references(() => doctorsTable.id),
