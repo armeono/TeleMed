@@ -5,6 +5,7 @@ import {
     pgEnum,
     text,
     timestamp,
+    jsonb,
   } from "drizzle-orm/pg-core";
   
   // Enums
@@ -18,6 +19,10 @@ import {
     "PEDIATRICS",
     "ORTHOPEDICS",
   ]);
+  export const appointmentTypeEnum = pgEnum("appointment_type", [
+    "ONLINE",
+    "IN_PERSONs",
+  ])
   export const availabilityEnum = pgEnum("availability", [
     "ONLINE",
     "OFFLINE",
@@ -96,6 +101,7 @@ import {
     patientId: integer("patient_id").references(() => patientsTable.id),
     doctorId: integer("doctor_id").references(() => doctorsTable.id),
     date: timestamp("date").notNull(),
+    type: appointmentTypeEnum(),
     time: varchar("time", { length: 256 }).notNull(),
     status: appointmentStatusEnum(),
     createdAt: timestamp("created_at").notNull(),
@@ -106,28 +112,20 @@ import {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     userId: integer("user_id").references(() => patientsTable.id),
     type: recordTypeEnum(),
-    description: text("description"),
     file: text("file"),
     createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at").notNull(),
   });
   
-  export const questionsTable = pgTable("questions", {
+  export const medicalInquiry = pgTable("medical_inquiry", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     doctorId: integer("doctor_id").references(() => doctorsTable.id),
     patientId: integer("patient_id").references(() => patientsTable.id),
-    text: text("text").notNull(),
-    isActive: timestamp("is_active"),
+    predefinedQuestions: jsonb("predefined_questions").notNull(),
+    patientQuestion: text("patient_question").notNull(),
+    imgUrl: text("img_url"),  
     createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at").notNull(),
-  });
-  
-  export const patientResponsesTable = pgTable("patient_responses", {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
-    patientId: integer("patient_id").references(() => patientsTable.id),
-    appointmentId: integer("appointment_id").references(() => appointmentsTable.id),
-    text: text("text").notNull(),
-    createdAt: timestamp("created_at").notNull(),
   });
   
   export const videoCallsTable = pgTable("video_call", {
