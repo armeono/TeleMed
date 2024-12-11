@@ -25,6 +25,8 @@ import {
 import { AlertCircle, LogIn, Stethoscope } from "lucide-react";
 import Link from "next/link";
 import { toast } from "@/hooks/use-toast";
+import { redirect } from "next/navigation";
+import { LoginType, action_login } from "@/server/auth/login";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -42,22 +44,26 @@ export default function LoginPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      console.log(values);
-      setIsSubmitting(false);
-      toast({
-        title: "Login Successful",
-        description: "Welcome back to TeleMed!",
-        duration: 5000,
-      });
-    }, 2000);
+
+    const response = await action_login(values as LoginType);
+
+    toast({
+      title:
+        response.status === "success" ? "Login Successful" : "Login Failed",
+      description: response.message,
+      duration: 5000,
+    });
+    setIsSubmitting(false);
+
+    if (response.status === "success") {
+      redirect("/dashboard");
+    }
   }
 
   return (
-    <div className="min-h-screen flex items-center ">
+    <div className="min-h-screen flex items-center">
       <Card className="max-w-md mx-auto w-[80%] sm:w-1/2">
         <CardHeader>
           <div className="flex items-center justify-center mb-4">

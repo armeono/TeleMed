@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Toaster } from "@/components/ui/toaster";
+
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -173,7 +173,6 @@ export default function Home() {
           </Link>
         </nav>
       </footer>
-      <Toaster />
     </div>
   );
 }
