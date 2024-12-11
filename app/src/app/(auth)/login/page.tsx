@@ -26,7 +26,7 @@ import { AlertCircle, LogIn, Stethoscope } from "lucide-react";
 import Link from "next/link";
 import { toast } from "@/hooks/use-toast";
 import { redirect } from "next/navigation";
-import { LoginType, login } from "@/server/auth/login";
+import { LoginType, action_login } from "@/server/auth/login";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -47,7 +47,7 @@ export default function LoginPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
 
-    const response = await login(values as LoginType);
+    const response = await action_login(values as LoginType);
 
     toast({
       title:

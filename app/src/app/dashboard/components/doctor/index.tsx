@@ -15,12 +15,17 @@ import {
 } from "lucide-react";
 import ProfilePopUp from "../profilePopUp";
 import Link from "next/link";
+import { UserDB } from "@/server/data-access/user/types";
 
-export default function DoctorDashboard() {
+type Props = {
+  user: UserDB;
+};
+
+export default function DoctorDashboard({ user }: Props) {
   return (
     <div className="min-h-screen bg-gray-100 p-10">
       <header className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Hello, Dr. Jane</h1>
+        <h1 className="text-3xl font-bold">Hello, Dr. {user.firstName}</h1>
         <ProfilePopUp />
       </header>
 

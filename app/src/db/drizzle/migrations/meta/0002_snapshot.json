@@ -1,6 +1,6 @@
 {
-  "id": "88c30613-4fb7-4e3c-a7b3-c32fb35fec03",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "e98dc6d0-2d14-42fd-8c36-08bc06e29be2",
+  "prevId": "66ee1fa1-eca5-4e23-afaf-e7fdd5a530b8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -116,7 +116,7 @@
           "name": "user_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "medical_license": {
           "name": "medical_license",
@@ -135,7 +135,7 @@
           "name": "years_of_experience",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "bio": {
           "name": "bio",
@@ -372,13 +372,7 @@
           "name": "user_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
-        },
-        "date_of_birth": {
-          "name": "date_of_birth",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "medical_id": {
           "name": "medical_id",
@@ -390,7 +384,7 @@
           "name": "jmbg",
           "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "gender": {
           "name": "gender",
@@ -450,13 +444,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "medical_id"
-          ]
-        },
-        "patient_jmbg_unique": {
-          "name": "patient_jmbg_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "jmbg"
           ]
         }
       },

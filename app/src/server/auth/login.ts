@@ -9,7 +9,7 @@ export type LoginType = {
   password: string;
 };
 
-export const login = async (data: LoginType) => {
+export const action_login = async (data: LoginType) => {
   try {
     const cookieStore = await cookies();
 
