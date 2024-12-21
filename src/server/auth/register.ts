@@ -34,7 +34,6 @@ export const action_register = async (
   data: DoctorRegisterType | PatientRegisterType
 ) => {
   try {
-    console.log(data);
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const response = await db.transaction(async (tx) => {

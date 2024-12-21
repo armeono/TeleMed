@@ -34,11 +34,11 @@ type Props = {
 };
 
 export default async function PatientProfile({ params }: Props) {
-  const patient: any = await db_getPatientInfoById(Number(params.id));
+  const patientId = Number((await params).id);
+
+  const patient: any = await db_getPatientInfoById(patientId);
 
   if (!patient) redirect("/dashboard");
-
-  console.log(patient);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -92,6 +92,19 @@ export default async function PatientProfile({ params }: Props) {
                 <div>
                   <Label>Weight</Label>
                   <p>{patient.weight}</p>
+                </div>
+              </div>
+              <Separator className="my-4" />
+              <div className="w-full">
+                <Label>Patient status</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Badge
+                    variant={
+                      patient.status === "CRITICAL" ? "destructive" : "default"
+                    }
+                  >
+                    {patient.status}
+                  </Badge>
                 </div>
               </div>
               <Separator className="my-4" />

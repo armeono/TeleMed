@@ -6,14 +6,13 @@ type Props = {
   patients: any;
 };
 const PatientOverviewRow = ({ patients }: Props) => {
-  console.log(patients);
   return (
     <div>
       {patients.map((patient: any) => (
         <Link
           href={`/patient/${patient.id}`}
           key={patient.id}
-          className="flex items-center justify-between py-4 border-b last:border-0"
+          className="flex items-center justify-between py-4 border-b last:border-0 hover:bg-gray-100 px-2"
         >
           <div>
             <div className="flex gap-2 items-center">
