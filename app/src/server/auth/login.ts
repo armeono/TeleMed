@@ -3,6 +3,7 @@ import { db } from "@/db/drizzle";
 import { usersTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
+import bcrypt from "bcrypt";
 
 export type LoginType = {
   email: string;
@@ -23,8 +24,9 @@ export const action_login = async (data: LoginType) => {
         message: "User with this email does not exist!",
       };
     }
+    const isPasswordValid = await bcrypt.compare(data.password, user.password);
 
-    if (user.password !== data.password) {
+    if (!isPasswordValid) {
       return {
         status: "error",
         message: "Invalid password!",
