@@ -65,7 +65,10 @@ const baseSchema = z.object({
     "ZAPADNOHERCEGOVACKI",
     "SARAJEVO",
     "CANTON_10",
-  ]),
+    
+  ],
+{
+    required_error: "Please select an area.",}),
   phone: z.string().min(6, { message: "Please enter a valid phone number." }),
 });
 
@@ -270,6 +273,51 @@ export default function RegisterPage() {
 
                   <FormField
                     control={form.control}
+                    name="area"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Area</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select area" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="UNSKO_SANSKI">
+                              Unsko Sanski
+                            </SelectItem>
+                            <SelectItem value="POSAVSKI">Posavski</SelectItem>
+                            <SelectItem value="TUZLANSKI">Tuzlanski</SelectItem>
+                            <SelectItem value="ZENICKO_DOBOJSKI">
+                              Zenicko Dobojksi
+                            </SelectItem>
+                            <SelectItem value="BOSANSKO_PODRINJSKI">
+                              Bosansko Podrinjski
+                            </SelectItem>
+                            <SelectItem value="SREDNJOBOSANSKI">
+                              Srednjobosanski
+                            </SelectItem>
+                            <SelectItem value="HERCEGOVACKO_NERETVANSKI">
+                              Hercegovacko Neretvanski
+                            </SelectItem>
+                            <SelectItem value="ZAPADNOHERCEGOVACKI">
+                              Zapadnohercegovacki
+                            </SelectItem>
+                            <SelectItem value="SARAJEVO">Sarajevo</SelectItem>
+                            <SelectItem value="CANTON_10">Canton 10</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="medicalId"
                     render={({ field }) => (
                       <FormItem>
@@ -416,6 +464,50 @@ export default function RegisterPage() {
                         <FormControl>
                           <Input type="phone" {...field} />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                                    <FormField
+                    control={form.control}
+                    name="area"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Area</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select area" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="UNSKO_SANSKI">
+                              Unsko Sanski
+                            </SelectItem>
+                            <SelectItem value="POSAVSKI">Posavski</SelectItem>
+                            <SelectItem value="TUZLANSKI">Tuzlanski</SelectItem>
+                            <SelectItem value="ZENICKO_DOBOJSKI">
+                              Zenicko Dobojksi
+                            </SelectItem>
+                            <SelectItem value="BOSANSKO_PODRINJSKI">
+                              Bosansko Podrinjski
+                            </SelectItem>
+                            <SelectItem value="SREDNJOBOSANSKI">
+                              Srednjobosanski
+                            </SelectItem>
+                            <SelectItem value="HERCEGOVACKO_NERETVANSKI">
+                              Hercegovacko Neretvanski
+                            </SelectItem>
+                            <SelectItem value="ZAPADNOHERCEGOVACKI">
+                              Zapadnohercegovacki
+                            </SelectItem>
+                            <SelectItem value="SARAJEVO">Sarajevo</SelectItem>
+                            <SelectItem value="CANTON_10">Canton 10</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
