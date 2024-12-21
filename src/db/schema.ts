@@ -8,10 +8,73 @@ import {
   timestamp,
   jsonb,
   serial,
+  numeric,
 } from "drizzle-orm/pg-core";
 
 // Enums
+
+export const patientStatus = pgEnum("patient_status", [
+  "CRITICAL",
+  "ACTIVE",
+  "INACTIVE",
+]);
+
 export const userRoleEnum = pgEnum("user_role", ["DOCTOR", "PATIENT"]);
+
+export const bloodTypeEnum = pgEnum("blood_type", [
+  "A+",
+  "A-",
+  "B+",
+  "B-",
+  "AB+",
+  "AB-",
+  "O+",
+  "O-",
+  "NO_BLOOD_TYPE",
+]);
+
+export const chronicConditionsEnum = pgEnum("chronic_conditions", [
+  "DIABETES",
+  "HYPERTENSION",
+  "CANCER",
+  "HEART_DISEASE",
+  "KIDNEY_DISEASE",
+  "LIVER_DISEASE",
+  "LUNG_DISEASE",
+  "THYROID_DISEASE",
+  "ARTHRITIS",
+  "OSTEOPOROSIS",
+  "ANEMIA",
+  "ASTHMA",
+  "COPD",
+  "HIV/AIDS",
+  "EPILEPSY",
+  "PSYCHIATRIC_DISORDER",
+  "OTHER",
+  "NO_CHRONIC_CONDITIONS",
+]);
+
+export const allergiesEnum = pgEnum("allergies", [
+  "PENICILLIN",
+  "ASPIRIN",
+  "SULFA DRUGS",
+  "INSULIN",
+  "IODINE",
+  "CODEINE",
+  "LATEX",
+  "PEANUTS",
+  "SHELLFISH",
+  "DAIRY",
+  "EGGS",
+  "SOY",
+  "WHEAT",
+  "NICKEL",
+  "PET DANDER",
+  "POLLEN",
+  "OTHER",
+  "NO_ALLERGIES",
+]);
+
 export const specializationEnum = pgEnum("specialization", [
   "INTERNAL_MEDICINE",
   "FAMILY_MEDICINE",
@@ -23,7 +86,7 @@ export const specializationEnum = pgEnum("specialization", [
 ]);
 export const appointmentTypeEnum = pgEnum("appointment_type", [
   "ONLINE",
-  "IN_PERSONs",
+  "IN_PERSON",
 ]);
 export const availabilityEnum = pgEnum("availability", [
   "ONLINE",
@@ -114,6 +177,14 @@ export const patientsTable = pgTable("patient", {
   gender: genderEnum(),
   address: text("address"),
   area: areaEnum(),
+  status: patientStatus().default("ACTIVE"),
+  weight: text("weight").default("N/A"),
+  height: text("height").default("N/A"),
+  bloodType: bloodTypeEnum("blood_type").array().default(["NO_BLOOD_TYPE"]),
+  allergies: allergiesEnum("allergies").array().default(["NO_ALLERGIES"]),
+  chronicConditions: chronicConditionsEnum("chronic_conditions")
+    .array()
+    .default(["NO_CHRONIC_CONDITIONS"]),
   createdAt: timestamp("created_at", { precision: 3, mode: "string" })
     .defaultNow()
     .notNull(),

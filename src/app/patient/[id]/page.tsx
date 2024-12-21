@@ -24,18 +24,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { db_getPatientInfoById } from "@/server/data-access/patient";
+import { redirect } from "next/navigation";
 
-export default function PatientProfile() {
-  const patient = {
-    name: "John Doe",
-    age: 45,
-    gender: "Male",
-    bloodType: "A+",
-    height: "5'10\"",
-    weight: "180 lbs",
-    allergies: ["Penicillin", "Peanuts"],
-    chronicConditions: ["Hypertension", "Type 2 Diabetes"],
+type Props = {
+  params: {
+    id: Promise<{ id: string }>;
   };
+};
+
+export default async function PatientProfile({ params }: Props) {
+  const patient: any = await db_getPatientInfoById(Number(params.id));
+
+  if (!patient) redirect("/dashboard");
+
+  console.log(patient);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -55,24 +58,28 @@ export default function PatientProfile() {
           <CardContent>
             <div className="flex flex-col items-center">
               <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src="/placeholder-avatar.jpg" alt={patient.name} />
+                <AvatarImage src="/placeholder-avatar.jpg" alt={"User image"} />
                 <AvatarFallback>
-                  {patient.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
+                  <div>
+                    {patient.user.firstName.charAt(0)}
+                    {patient.user.lastName.charAt(0)}
+                  </div>
                 </AvatarFallback>
               </Avatar>
-              <h2 className="text-2xl font-bold mb-2">{patient.name}</h2>
-              <p className="text-muted-foreground mb-4">Patient ID: 123456</p>
+              <h2 className="text-2xl font-bold mb-2">
+                {patient.user.firstName + " " + patient.user.lastName}
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                Patient ID: {patient.medicalId}
+              </p>
               <div className="grid grid-cols-2 gap-4 w-full">
                 <div>
                   <Label>Age</Label>
-                  <p>{patient.age}</p>
+                  <p>12</p>
                 </div>
                 <div>
                   <Label>Gender</Label>
-                  <p>{patient.gender}</p>
+                  <p>{patient.gender ?? "OTHER"}</p>
                 </div>
                 <div>
                   <Label>Blood Type</Label>
@@ -91,7 +98,7 @@ export default function PatientProfile() {
               <div className="w-full">
                 <Label>Allergies</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {patient.allergies.map((allergy) => (
+                  {patient.allergies.map((allergy: string) => (
                     <Badge key={allergy} variant="destructive">
                       {allergy}
                     </Badge>
@@ -102,7 +109,7 @@ export default function PatientProfile() {
               <div className="w-full">
                 <Label>Chronic Conditions</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {patient.chronicConditions.map((condition) => (
+                  {patient.chronicConditions.map((condition: string) => (
                     <Badge key={condition} variant="secondary">
                       {condition}
                     </Badge>

@@ -16,12 +16,19 @@ import {
 import ProfilePopUp from "../profilePopUp";
 import Link from "next/link";
 import { UserDB } from "@/server/data-access/user/types";
+import PatientOverview from "./components/patient-overview";
+import { db_getDoctorInfo } from "@/server/data-access/doctor";
+import { redirect } from "next/navigation";
 
 type Props = {
   user: UserDB;
 };
 
-export default function DoctorDashboard({ user }: Props) {
+export default async function DoctorDashboard({ user }: Props) {
+  const doctorInfo = await db_getDoctorInfo(user.id);
+
+  if (!doctorInfo) redirect("/login");
+
   return (
     <div className="min-h-screen bg-gray-100 p-10">
       <header className="mb-8 flex items-center justify-between">
@@ -70,95 +77,7 @@ export default function DoctorDashboard({ user }: Props) {
             <p className="text-xs text-muted-foreground">3 urgent, 4 regular</p>
           </CardContent>
         </Card>
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Patient Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="all">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="critical">Critical</TabsTrigger>
-                <TabsTrigger value="new">New</TabsTrigger>
-              </TabsList>
-              <TabsContent value="all">
-                <ScrollArea className="h-[300px] mt-4">
-                  {[
-                    {
-                      id: 1,
-                      name: "Frank Wilson",
-                      status: "Stable",
-                      lastVisit: "2023-05-15",
-                    },
-                    {
-                      id: 2,
-                      name: "Grace Lee",
-                      status: "Critical",
-                      lastVisit: "2023-05-14",
-                    },
-                    {
-                      id: 3,
-                      name: "Henry Davis",
-                      status: "New",
-                      lastVisit: "2023-05-13",
-                    },
-                    {
-                      id: 4,
-                      name: "Ivy Chen",
-                      status: "Stable",
-                      lastVisit: "2023-05-12",
-                    },
-                    {
-                      id: 5,
-                      name: "Jack Brown",
-                      status: "Critical",
-                      lastVisit: "2023-05-11",
-                    },
-                  ].map((patient) => (
-                    <Link
-                      href={`/patient/${patient.id}`}
-                      key={patient.id}
-                      className="flex items-center justify-between py-4 border-b last:border-0"
-                    >
-                      <div>
-                        <p className="font-medium">{patient.name}</p>
-                        <p className="text-sm text-gray-500">
-                          Last visit: {patient.lastVisit}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge
-                          variant={
-                            patient.status === "Critical"
-                              ? "destructive"
-                              : patient.status === "New"
-                              ? "secondary"
-                              : "outline"
-                          }
-                        >
-                          {patient.status}
-                        </Badge>
-                        <div>
-                          <ChevronRight className="h-4 w-4" />
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </ScrollArea>
-              </TabsContent>
-              <TabsContent value="critical">
-                <p className="text-sm text-gray-500 mt-4">
-                  Showing critical patients...
-                </p>
-              </TabsContent>
-              <TabsContent value="new">
-                <p className="text-sm text-gray-500 mt-4">
-                  Showing new patients...
-                </p>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+        <PatientOverview doctorId={doctorInfo.id} />
         <Card>
           <CardHeader>
             <CardTitle>Upcoming Appointments</CardTitle>

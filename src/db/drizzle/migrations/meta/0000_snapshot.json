@@ -1,5 +1,5 @@
 {
-  "id": "88c30613-4fb7-4e3c-a7b3-c32fb35fec03",
+  "id": "a2cdc033-692f-4fd8-9dc7-e649fcee042b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -49,6 +49,12 @@
           "name": "status",
           "type": "appointmentStatus",
           "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "feedback": {
+          "name": "feedback",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -116,7 +122,7 @@
           "name": "user_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "medical_license": {
           "name": "medical_license",
@@ -135,7 +141,7 @@
           "name": "years_of_experience",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "bio": {
           "name": "bio",
@@ -358,6 +364,64 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.patient_on_doctor": {
+      "name": "patient_on_doctor",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "doctor_id": {
+          "name": "doctor_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "patient_on_doctor_doctor_id_doctor_id_fk": {
+          "name": "patient_on_doctor_doctor_id_doctor_id_fk",
+          "tableFrom": "patient_on_doctor",
+          "tableTo": "doctor",
+          "columnsFrom": [
+            "doctor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "patient_on_doctor_patient_id_patient_id_fk": {
+          "name": "patient_on_doctor_patient_id_patient_id_fk",
+          "tableFrom": "patient_on_doctor",
+          "tableTo": "patient",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.patient": {
       "name": "patient",
       "schema": "",
@@ -372,13 +436,7 @@
           "name": "user_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
-        },
-        "date_of_birth": {
-          "name": "date_of_birth",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "medical_id": {
           "name": "medical_id",
@@ -390,7 +448,7 @@
           "name": "jmbg",
           "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "gender": {
           "name": "gender",
@@ -411,6 +469,49 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "patient_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'ACTIVE'"
+        },
+        "weight": {
+          "name": "weight",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'N/A'"
+        },
+        "height": {
+          "name": "height",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'N/A'"
+        },
+        "blood_type": {
+          "name": "blood_type",
+          "type": "blood_type[]",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{\"NO_BLOOD_TYPE\"}'"
+        },
+        "allergies": {
+          "name": "allergies",
+          "type": "allergies[]",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{\"NO_ALLERGIES\"}'"
+        },
+        "chronic_conditions": {
+          "name": "chronic_conditions",
+          "type": "chronic_conditions[]",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{\"NO_CHRONIC_CONDITIONS\"}'"
         },
         "created_at": {
           "name": "created_at",
@@ -450,13 +551,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "medical_id"
-          ]
-        },
-        "patient_jmbg_unique": {
-          "name": "patient_jmbg_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "jmbg"
           ]
         }
       },
@@ -641,6 +735,30 @@
     }
   },
   "enums": {
+    "public.allergies": {
+      "name": "allergies",
+      "schema": "public",
+      "values": [
+        "PENICILLIN",
+        "ASPIRIN",
+        "SULFA DRUGS",
+        "INSULIN",
+        "IODINE",
+        "CODEINE",
+        "LATEX",
+        "PEANUTS",
+        "SHELLFISH",
+        "DAIRY",
+        "EGGS",
+        "SOY",
+        "WHEAT",
+        "NICKEL",
+        "PET DANDER",
+        "POLLEN",
+        "OTHER",
+        "NO_ALLERGIES"
+      ]
+    },
     "public.appointmentStatus": {
       "name": "appointmentStatus",
       "schema": "public",
@@ -655,7 +773,7 @@
       "schema": "public",
       "values": [
         "ONLINE",
-        "IN_PERSONs"
+        "IN_PERSON"
       ]
     },
     "public.area": {
@@ -683,12 +801,60 @@
         "BUSY"
       ]
     },
+    "public.blood_type": {
+      "name": "blood_type",
+      "schema": "public",
+      "values": [
+        "A+",
+        "A-",
+        "B+",
+        "B-",
+        "AB+",
+        "AB-",
+        "O+",
+        "O-",
+        "NO_BLOOD_TYPE"
+      ]
+    },
+    "public.chronic_conditions": {
+      "name": "chronic_conditions",
+      "schema": "public",
+      "values": [
+        "DIABETES",
+        "HYPERTENSION",
+        "CANCER",
+        "HEART_DISEASE",
+        "KIDNEY_DISEASE",
+        "LIVER_DISEASE",
+        "LUNG_DISEASE",
+        "THYROID_DISEASE",
+        "ARTHRITIS",
+        "OSTEOPOROSIS",
+        "ANEMIA",
+        "ASTHMA",
+        "COPD",
+        "HIV/AIDS",
+        "EPILEPSY",
+        "PSYCHIATRIC_DISORDER",
+        "OTHER",
+        "NO_CHRONIC_CONDITIONS"
+      ]
+    },
     "public.gender": {
       "name": "gender",
       "schema": "public",
       "values": [
         "MALE",
         "FEMALE"
+      ]
+    },
+    "public.patient_status": {
+      "name": "patient_status",
+      "schema": "public",
+      "values": [
+        "CRITICAL",
+        "ACTIVE",
+        "INACTIVE"
       ]
     },
     "public.record_type": {

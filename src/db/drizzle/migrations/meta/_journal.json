@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1733870502857,
-      "tag": "0000_serious_marvel_boy",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1733874309791,
-      "tag": "0001_young_baron_strucker",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1733875227634,
-      "tag": "0002_nasty_gamma_corps",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1734789402748,
-      "tag": "0003_stormy_invisible_woman",
+      "when": 1734799031336,
+      "tag": "0000_numerous_mongoose",
       "breakpoints": true
     }
   ]
