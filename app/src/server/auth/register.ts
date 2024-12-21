@@ -2,12 +2,13 @@
 import { db } from "@/db/drizzle";
 import { doctorsTable, patientsTable, usersTable } from "@/db/schema";
 import { AreaEnum } from "../types/enums";
+import  bcrypt  from "bcrypt";
 
 export type RegisterType = {
   firstName: string;
   lastName: string;
   email: string;
-  password: any;
+  password: string;
   dateOfBirth: any;
   area: keyof typeof AreaEnum;
   gender: "MALE" | "FEMALE";
@@ -28,19 +29,21 @@ export const action_register = async (
   data: DoctorRegisterType | PatientRegisterType
 ) => {
   try {
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
     const response = await db.transaction(async (tx) => {
-      const newUser = await db
+      const newUser = await tx
         .insert(usersTable)
-        .values({ ...data })
+        .values({ ...data, password: hashedPassword })
         .returning();
 
       if (data.role === "DOCTOR") {
-        await db.insert(doctorsTable).values({
+        await tx.insert(doctorsTable).values({
           userId: newUser[0].id,
           medicalLicense: data.licenseNumber,
         });
       } else {
-        await db.insert(patientsTable).values({
+        await tx.insert(patientsTable).values({
           userId: newUser[0].id,
           medicalId: data.medicalId,
         });
