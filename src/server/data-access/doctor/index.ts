@@ -14,3 +14,20 @@ export const db_getDoctorInfo = async (userId: number) => {
     return null;
   }
 };
+
+export const db_getAvailableDoctors = async () => {
+  try {
+    const doctors = await db.query.doctorsTable.findMany({
+      with: { user: true },
+    });
+
+    if (!doctors) {
+      return [];
+    }
+
+    return doctors;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};

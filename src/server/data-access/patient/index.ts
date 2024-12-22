@@ -40,3 +40,20 @@ export const db_getPatientInfoById = async (patientId: number) => {
     console.log(error);
   }
 };
+
+export const db_getPatientInfoByUserId = async (userId: number) => {
+  try {
+    const patient = await db.query.patientsTable.findFirst({
+      where: eq(patientsTable.userId, userId),
+      with: {
+        user: true,
+      },
+    });
+
+    if (!patient) throw new Error("Patient not found!");
+
+    return patient;
+  } catch (error) {
+    console.log(error);
+  }
+};

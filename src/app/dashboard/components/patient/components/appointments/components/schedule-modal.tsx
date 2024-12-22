@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DoctorDto } from "@/server/dto/doctor";
 
 const timeSlots = [
   "09:00 AM",
@@ -37,36 +38,17 @@ const timeSlots = [
   "03:30 PM",
 ];
 
-const doctors = [
-  {
-    id: "1",
-    name: "Dr. Smith",
-    specialty: "Cardiologist",
-    avatar: "/placeholder.svg",
-    availableDays: ["Monday", "Wednesday", "Friday"],
-  },
-  {
-    id: "2",
-    name: "Dr. Johnson",
-    specialty: "Neurologist",
-    avatar: "/placeholder.svg",
-    availableDays: ["Tuesday", "Thursday"],
-  },
-  {
-    id: "3",
-    name: "Dr. Williams",
-    specialty: "Dermatologist",
-    avatar: "/placeholder.svg",
-    availableDays: ["Monday", "Thursday", "Friday"],
-  },
-];
-
 interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
+  availableDoctors: DoctorDto[];
 }
 
-export default function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
+export default function ScheduleModal({
+  isOpen,
+  onClose,
+  availableDoctors,
+}: ScheduleModalProps) {
   const [step, setStep] = React.useState(1);
   const [selectedDate, setSelectedDate] = React.useState<Date>();
   const [selectedTime, setSelectedTime] = React.useState<string>();
@@ -120,31 +102,39 @@ export default function ScheduleModal({ isOpen, onClose }: ScheduleModalProps) {
         {step === 1 && (
           <div className="space-y-4">
             <div className="grid gap-4">
-              {doctors.map((doctor) => (
+              {availableDoctors.map((doctor) => (
                 <div
                   key={doctor.id}
                   className={`flex items-center space-x-4 rounded-lg border p-4 cursor-pointer transition-colors ${
-                    selectedDoctor === doctor.id
+                    selectedDoctor === String(doctor.id)
                       ? "border-primary bg-primary/5"
                       : "hover:bg-muted/50"
                   }`}
-                  onClick={() => setSelectedDoctor(doctor.id)}
+                  onClick={() => setSelectedDoctor(String(doctor.id))}
                 >
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={doctor.avatar} alt={doctor.name} />
-                    <AvatarFallback>{doctor.name[0]}</AvatarFallback>
+                    {/* <AvatarImage src={doctor.avatar} alt={doctor.name} /> */}
+                    <AvatarFallback>
+                      {doctor.user.firstName.charAt(0) +
+                        doctor.user.lastName.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <h3 className="font-medium">{doctor.name}</h3>
+                    <h3 className="font-medium">
+                      {"Dr. " +
+                        doctor.user.firstName +
+                        " " +
+                        doctor.user.lastName}
+                    </h3>
                     <p className="text-sm text-muted-foreground">
-                      {doctor.specialty}
+                      {doctor.specialization}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Available: {doctor.availableDays.join(", ")}
+                      Available: Monday, Tuesday
                     </p>
                   </div>
                   <RadioGroup value={selectedDoctor}>
-                    <RadioGroupItem value={doctor.id} />
+                    <RadioGroupItem value={String(doctor.id)} />
                   </RadioGroup>
                 </div>
               ))}

@@ -8,6 +8,13 @@
       "when": 1734799031336,
       "tag": "0000_numerous_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1734881728203,
+      "tag": "0001_freezing_adam_destine",
+      "breakpoints": true
     }
   ]
 }

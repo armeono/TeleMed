@@ -230,9 +230,12 @@ export const appointmentsTable = pgTable("appointment", {
   doctorId: integer("doctor_id").references(() => doctorsTable.id),
   date: timestamp("date").notNull(),
   type: appointmentTypeEnum(),
-  time: varchar("time", { length: 256 }).notNull(),
   status: appointmentStatusEnum(),
   feedback: text("feedback"),
+  appointmentTime: timestamp("appointmentTime", {
+    precision: 3,
+    mode: "string",
+  }).notNull(),
   createdAt: timestamp("created_at", { precision: 3, mode: "string" })
     .defaultNow()
     .notNull(),

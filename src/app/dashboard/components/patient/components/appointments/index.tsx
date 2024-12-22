@@ -8,63 +8,57 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Divide, MoreVertical, PlusCircle } from "lucide-react";
 import ScheduleModal from "./components/schedule-modal";
 import { useState } from "react";
+import { AppointmentDB } from "@/server/data-access/appointments/types";
+import { DoctorDto } from "@/server/dto/doctor";
 
-const PatientAppointments = () => {
+type Props = {
+  appointments: AppointmentDB[];
+  availableDoctors: DoctorDto[];
+};
+
+const PatientAppointments = ({ appointments, availableDoctors }: Props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   return (
-    <Card className="mnl,">
+    <Card>
       <CardHeader>
         <CardTitle>Upcoming Appointments</CardTitle>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[300px]">
-          {[
-            {
-              id: 1,
-              doctor: "Dr. Smith",
-              date: "May 28, 2023",
-              time: "10:00 AM",
-              type: "Video Call",
-            },
-            {
-              id: 2,
-              doctor: "Dr. Johnson",
-              date: "June 5, 2023",
-              time: "2:30 PM",
-              type: "In-person",
-            },
-            {
-              id: 3,
-              doctor: "Dr. Williams",
-              date: "June 15, 2023",
-              time: "11:15 AM",
-              type: "Video Call",
-            },
-          ].map((appointment) => (
-            <div
-              key={appointment.id}
-              className="flex items-center justify-between py-4 border-b last:border-0"
-            >
-              <div>
-                <p className="font-medium">{appointment.doctor}</p>
-                <p className="text-sm text-gray-500">
-                  {appointment.date} at {appointment.time}
-                </p>
+          {appointments.length > 0 ? (
+            appointments.map((appointment) => (
+              <div
+                key={appointment.id}
+                className="flex items-center justify-between py-4 border-b last:border-0"
+              >
+                <div>
+                  <p className="font-medium">Doctor name</p>
+                  <p className="text-sm text-gray-500">
+                    {appointment.appointmentTime} at{" "}
+                    {appointment.appointmentTime}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge
+                    variant={
+                      appointment.type === "ONLINE" ? "secondary" : "outline"
+                    }
+                  >
+                    {appointment.type}
+                  </Badge>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Badge
-                  variant={
-                    appointment.type === "Video Call" ? "secondary" : "outline"
-                  }
-                >
-                  {appointment.type}
-                </Badge>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </div>
+            ))
+          ) : (
+            <div className="w-full h-[200px] flex justify-center items-center">
+              <p className="text-muted-foreground text-center">
+                No upcoming appointments
+              </p>
             </div>
-          ))}
+          )}
         </ScrollArea>
 
         <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
@@ -78,6 +72,7 @@ const PatientAppointments = () => {
             <ScheduleModal
               onClose={() => setIsDialogOpen(false)}
               isOpen={isDialogOpen}
+              availableDoctors={availableDoctors}
             />
           </DialogContent>
         </Dialog>

@@ -8,12 +8,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { UserDB } from "@/server/data-access/user/types";
 import ProfilePopUp from "../profilePopUp";
 import PatientAppointments from "./components/appointments";
+import { db_getPatientInfoByUserId } from "@/server/data-access/patient";
+import { db_getPatientAppointments } from "@/server/data-access/appointments";
+import { db_getAvailableDoctors } from "@/server/data-access/doctor";
 
 type Props = {
   user: UserDB;
 };
 
-export default function PatientDashboard({ user }: Props) {
+export default async function PatientDashboard({ user }: Props) {
+  const patient = await db_getPatientInfoByUserId(user.id);
+  const appointments = await db_getPatientAppointments(user.id);
+
+  const availableDoctors = await db_getAvailableDoctors();
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <header className="mb-8 flex items-center justify-between">
@@ -68,7 +76,10 @@ export default function PatientDashboard({ user }: Props) {
           </CardContent>
         </Card>
 
-        <PatientAppointments />
+        <PatientAppointments
+          appointments={appointments}
+          availableDoctors={availableDoctors}
+        />
 
         <Card className="md:col-span-2">
           <CardHeader>
