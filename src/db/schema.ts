@@ -228,10 +228,10 @@ export const appointmentsTable = pgTable("appointment", {
   id: serial("id").primaryKey(),
   patientId: integer("patient_id").references(() => patientsTable.id),
   doctorId: integer("doctor_id").references(() => doctorsTable.id),
-  date: timestamp("date").notNull(),
   type: appointmentTypeEnum(),
   status: appointmentStatusEnum(),
   feedback: text("feedback"),
+  reason: text("reason"),
   appointmentTime: timestamp("appointmentTime", {
     precision: 3,
     mode: "string",

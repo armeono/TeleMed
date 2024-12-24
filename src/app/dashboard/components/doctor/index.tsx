@@ -19,6 +19,8 @@ import { UserDB } from "@/server/data-access/user/types";
 import PatientOverview from "./components/patient-overview";
 import { db_getDoctorInfo } from "@/server/data-access/doctor";
 import { redirect } from "next/navigation";
+import { db_getDoctorAppointments } from "@/server/data-access/appointments";
+import UpcomingAppointments from "./components/upcoming-appointments";
 
 type Props = {
   user: UserDB;
@@ -26,6 +28,10 @@ type Props = {
 
 export default async function DoctorDashboard({ user }: Props) {
   const doctorInfo = await db_getDoctorInfo(user.id);
+
+  if (!doctorInfo) redirect("/login");
+
+  const appointments = await db_getDoctorAppointments(doctorInfo.id);
 
   if (!doctorInfo) redirect("/login");
 
@@ -78,83 +84,7 @@ export default async function DoctorDashboard({ user }: Props) {
           </CardContent>
         </Card>
         <PatientOverview doctorId={doctorInfo.id} />
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Appointments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[300px]">
-              {[
-                {
-                  id: 1,
-                  name: "Alice Johnson",
-                  time: "10:00 AM",
-                  type: "Video Call",
-                },
-                {
-                  id: 2,
-                  name: "Bob Smith",
-                  time: "11:30 AM",
-                  type: "In-person",
-                },
-                {
-                  id: 3,
-                  name: "Carol Williams",
-                  time: "2:00 PM",
-                  type: "Video Call",
-                },
-                {
-                  id: 4,
-                  name: "David Brown",
-                  time: "3:30 PM",
-                  type: "In-person",
-                },
-                {
-                  id: 5,
-                  name: "Eve Taylor",
-                  time: "4:45 PM",
-                  type: "In-person",
-                },
-              ].map((appointment) => (
-                <div
-                  key={appointment.id}
-                  className="flex items-center justify-between py-4 border-b last:border-0"
-                >
-                  <div className="flex items-center space-x-4">
-                    <Avatar>
-                      <AvatarFallback>
-                        {appointment.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{appointment.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {appointment.time}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge
-                      variant={
-                        appointment.type === "Video Call"
-                          ? "secondary"
-                          : "outline"
-                      }
-                    >
-                      {appointment.type}
-                    </Badge>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </ScrollArea>
-          </CardContent>
-        </Card>
+        <UpcomingAppointments appointments={appointments} />
       </div>
     </div>
   );

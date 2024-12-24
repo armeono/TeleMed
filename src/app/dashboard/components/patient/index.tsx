@@ -9,8 +9,12 @@ import { UserDB } from "@/server/data-access/user/types";
 import ProfilePopUp from "../profilePopUp";
 import PatientAppointments from "./components/appointments";
 import { db_getPatientInfoByUserId } from "@/server/data-access/patient";
-import { db_getPatientAppointments } from "@/server/data-access/appointments";
+import {
+  db_getDoctorAvailableAppointmentSlots,
+  db_getPatientAppointments,
+} from "@/server/data-access/appointments";
 import { db_getAvailableDoctors } from "@/server/data-access/doctor";
+import { redirect } from "next/navigation";
 
 type Props = {
   user: UserDB;
@@ -18,7 +22,12 @@ type Props = {
 
 export default async function PatientDashboard({ user }: Props) {
   const patient = await db_getPatientInfoByUserId(user.id);
-  const appointments = await db_getPatientAppointments(user.id);
+
+  if (!patient) redirect("/login");
+
+  const appointments = await db_getPatientAppointments(patient.id);
+
+  console.log(appointments);
 
   const availableDoctors = await db_getAvailableDoctors();
 
@@ -79,6 +88,7 @@ export default async function PatientDashboard({ user }: Props) {
         <PatientAppointments
           appointments={appointments}
           availableDoctors={availableDoctors}
+          patientId={patient.id}
         />
 
         <Card className="md:col-span-2">

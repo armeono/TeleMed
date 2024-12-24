@@ -1,59 +1,67 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format, setHours, setMinutes } from "date-fns";
-import { Calendar, Clock, User } from "lucide-react";
+import { addDays } from "date-fns";
+import { Clock } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { DoctorDto } from "@/server/dto/doctor";
-
-const timeSlots = [
-  "09:00 AM",
-  "09:30 AM",
-  "10:00 AM",
-  "10:30 AM",
-  "11:00 AM",
-  "11:30 AM",
-  "02:00 PM",
-  "02:30 PM",
-  "03:00 PM",
-  "03:30 PM",
-];
+import { useEffect, useState } from "react";
+import { db_getDoctorAvailableAppointmentSlots } from "@/server/data-access/appointments";
+import { action_scheduleAppointment } from "@/server/actions/appointments";
+import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
   availableDoctors: DoctorDto[];
+  patientId: number;
 }
 
 export default function ScheduleModal({
   isOpen,
   onClose,
   availableDoctors,
+  patientId,
 }: ScheduleModalProps) {
   const [step, setStep] = React.useState(1);
-  const [selectedDate, setSelectedDate] = React.useState<Date>();
-  const [selectedTime, setSelectedTime] = React.useState<string>();
-  const [selectedDoctor, setSelectedDoctor] = React.useState<string>();
-  const [appointmentType, setAppointmentType] = React.useState<string>();
+  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedTime, setSelectedTime] = useState<string>();
+  const [selectedDoctor, setSelectedDoctor] = useState<string>();
+  const [appointmentType, setAppointmentType] = useState<string>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<
+    { time: string; available: boolean }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchAvailableTimeSlots = async () => {
+      try {
+        const availableTimeSlots = await db_getDoctorAvailableAppointmentSlots(
+          Number(selectedDoctor),
+          selectedDate!
+        );
+
+        setAvailableTimeSlots(availableTimeSlots);
+      } catch (error) {
+        console.error("Failed to fetch available time slots:", error);
+      }
+    };
+
+    console.log(availableTimeSlots);
+
+    if (selectedDoctor && selectedDate) {
+      fetchAvailableTimeSlots();
+    }
+  }, [selectedDoctor, selectedDate]);
 
   const handleNext = () => {
     if (step < 4) setStep(step + 1);
@@ -63,20 +71,40 @@ export default function ScheduleModal({
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSchedule = () => {
-    // Implement scheduling logic here
-    console.log({
+  const handleSchedule = async () => {
+    setIsSubmitting(true);
+    const response = await action_scheduleAppointment({
+      patientId,
+      doctorId: Number(selectedDoctor),
       date: selectedDate,
       time: selectedTime,
-      doctor: selectedDoctor,
+      reason: "Regular Checkup",
       type: appointmentType,
     });
+
+    if (response.status === "error") {
+      toast({
+        title: "Failed to schedule appointment!",
+        description: response.message,
+      });
+    } else {
+      toast({
+        title: "Successfully scheduled appointment!",
+        description: response.message,
+      });
+    }
+
+    router.refresh();
+
     onClose();
+    setIsSubmitting(false);
   };
 
   return (
     <div>
-      <h1 className="font-bold text-xl">Schedule New Appointment</h1>
+      <DialogTitle className="font-bold text-xl">
+        Schedule New Appointment
+      </DialogTitle>
 
       <p className="text-gray-700 ">
         {step === 1 && "Select your preferred doctor for the appointment."}
@@ -161,15 +189,16 @@ export default function ScheduleModal({
         {step === 3 && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-2">
-              {timeSlots.map((time) => (
+              {availableTimeSlots.map((slot) => (
                 <Button
-                  key={time}
-                  variant={selectedTime === time ? "default" : "outline"}
+                  key={slot.time}
+                  variant={selectedTime === slot.time ? "default" : "outline"}
                   className="w-full"
-                  onClick={() => setSelectedTime(time)}
+                  disabled={!slot.available}
+                  onClick={() => setSelectedTime(slot.time)}
                 >
                   <Clock className="mr-2 h-4 w-4" />
-                  {time}
+                  {slot.time}
                 </Button>
               ))}
             </div>
@@ -193,14 +222,14 @@ export default function ScheduleModal({
                 <div className="grid gap-4">
                   <div
                     className={`flex items-center space-x-4 rounded-lg border p-4 cursor-pointer transition-colors ${
-                      appointmentType === "video"
+                      appointmentType === "ONLINE"
                         ? "border-primary bg-primary/5"
                         : "hover:bg-muted/50"
                     }`}
-                    onClick={() => setAppointmentType("video")}
+                    onClick={() => setAppointmentType("ONLINE")}
                   >
-                    <RadioGroupItem value="video" id="video" />
-                    <Label htmlFor="video" className="flex-1 cursor-pointer">
+                    <RadioGroupItem value="ONLINE" id="ONLINE" />
+                    <Label htmlFor="ONLINE" className="flex-1 cursor-pointer">
                       <div className="font-medium">Video Call</div>
                       <div className="text-sm text-muted-foreground">
                         Consult with your doctor through a secure video call
@@ -209,15 +238,15 @@ export default function ScheduleModal({
                   </div>
                   <div
                     className={`flex items-center space-x-4 rounded-lg border p-4 cursor-pointer transition-colors ${
-                      appointmentType === "in-person"
+                      appointmentType === "IN_PERSON"
                         ? "border-primary bg-primary/5"
                         : "hover:bg-muted/50"
                     }`}
-                    onClick={() => setAppointmentType("in-person")}
+                    onClick={() => setAppointmentType("IN_PERSON")}
                   >
-                    <RadioGroupItem value="in-person" id="in-person" />
+                    <RadioGroupItem value="IN_PERSON" id="IN_PERSON" />
                     <Label
-                      htmlFor="in-person"
+                      htmlFor="IN_PERSON"
                       className="flex-1 cursor-pointer"
                     >
                       <div className="font-medium">In-Person Visit</div>
@@ -243,7 +272,8 @@ export default function ScheduleModal({
               (step === 1 && !selectedDoctor) ||
               (step === 2 && !selectedDate) ||
               (step === 3 && !selectedTime) ||
-              (step === 4 && !appointmentType)
+              (step === 4 && !appointmentType) ||
+              isSubmitting
             }
           >
             {step === 4 ? "Schedule Appointment" : "Next"}

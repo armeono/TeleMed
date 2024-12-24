@@ -12,23 +12,15 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Divide, MoreVertical, PlusCircle } from "lucide-react";
-import ScheduleModal from "./components/schedule-modal";
 import { useState } from "react";
-import { PatientAppointmentDB } from "@/server/data-access/appointments/types";
+import { DoctorAppointmentDB } from "@/server/data-access/appointments/types";
 import { DoctorDto } from "@/server/dto/doctor";
 
 type Props = {
-  appointments: PatientAppointmentDB[];
-  availableDoctors: DoctorDto[];
-  patientId: number;
+  appointments: DoctorAppointmentDB[];
 };
 
-const PatientAppointments = ({
-  appointments,
-  availableDoctors,
-  patientId,
-}: Props) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+const PatientAppointments = ({ appointments }: Props) => {
   return (
     <Card>
       <CardHeader>
@@ -44,10 +36,9 @@ const PatientAppointments = ({
               >
                 <div>
                   <p className="font-medium">
-                    Dr.{" "}
-                    {appointment.doctor.user.firstName +
+                    {appointment.patient.user.firstName +
                       " " +
-                      appointment.doctor.user.lastName}
+                      appointment.patient.user.lastName}
                   </p>
                   <p className="text-sm text-gray-500">
                     {appointment.appointmentTime}
@@ -75,23 +66,6 @@ const PatientAppointments = ({
             </div>
           )}
         </ScrollArea>
-
-        <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
-          <DialogTrigger className="w-full">
-            <Button className="w-full mt-4">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Schedule New Appointment
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <ScheduleModal
-              onClose={() => setIsDialogOpen(false)}
-              isOpen={isDialogOpen}
-              availableDoctors={availableDoctors}
-              patientId={patientId}
-            />
-          </DialogContent>
-        </Dialog>
       </CardContent>
     </Card>
   );
