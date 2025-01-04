@@ -15,6 +15,9 @@ import {
 } from "@/server/data-access/appointments";
 import { db_getAvailableDoctors } from "@/server/data-access/doctor";
 import { redirect } from "next/navigation";
+import Chat from "@/app/chat/page";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 
 type Props = {
   user: UserDB;
@@ -26,8 +29,6 @@ export default async function PatientDashboard({ user }: Props) {
   if (!patient) redirect("/login");
 
   const appointments = await db_getPatientAppointments(patient.id);
-
-  console.log(appointments);
 
   const availableDoctors = await db_getAvailableDoctors();
 
@@ -95,66 +96,35 @@ export default async function PatientDashboard({ user }: Props) {
           <CardHeader>
             <CardTitle>Chat with Doctor</CardTitle>
           </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[300px] mb-4">
-              {[
-                {
-                  id: 1,
-                  sender: "Dr. Smith",
-                  message: "How are you feeling today?",
-                  time: "10:00 AM",
-                },
-                {
-                  id: 2,
-                  sender: "You",
-                  message: "I'm feeling much better, thank you.",
-                  time: "10:05 AM",
-                },
-                {
-                  id: 3,
-                  sender: "Dr. Smith",
-                  message:
-                    "That's great to hear. Any side effects from the new medication?",
-                  time: "10:07 AM",
-                },
-                {
-                  id: 4,
-                  sender: "You",
-                  message: "No side effects so far.",
-                  time: "10:10 AM",
-                },
-              ].map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex flex-col ${
-                    message.sender === "You" ? "items-end" : "items-start"
-                  } mb-2`}
+          <Separator />
+          <Tabs
+            defaultValue={String(availableDoctors[0].id)}
+            className="pt-4 w-full flex flex-col justify-center items-center"
+          >
+            <TabsList>
+              {availableDoctors.map((availableDoctor) => (
+                <TabsTrigger
+                  value={String(availableDoctor.id)}
+                  key={availableDoctor.id}
                 >
-                  <div
-                    className={`px-3 py-2 rounded-lg ${
-                      message.sender === "You"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary"
-                    }`}
-                  >
-                    <p className="text-sm">{message.message}</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {message.time}
-                  </p>
-                </div>
+                  {"Dr. " + availableDoctor.user.firstName}
+                </TabsTrigger>
               ))}
-            </ScrollArea>
-            <div className="flex items-center space-x-2">
-              <Textarea
-                placeholder="Type your message..."
-                className="flex-grow"
-              />
-              <Button size="icon">
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
+            </TabsList>
+
+            {availableDoctors.map((availableDoctor) => (
+              <TabsContent
+                value={String(availableDoctor.id)}
+                className="w-full"
+                key={availableDoctor.id}
+              >
+                <Chat
+                  senderId={patient.user.id}
+                  recipientId={availableDoctor.user.id}
+                />
+              </TabsContent>
+            ))}
+          </Tabs>
         </Card>
       </div>
     </div>

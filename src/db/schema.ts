@@ -296,6 +296,16 @@ export const medicalInquiry = pgTable("medical_inquiry", {
     .$onUpdate(() => new Date().toISOString()),
 });
 
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  senderId: integer("sender_id").references(() => usersTable.id),
+  receiverId: integer("receiver_id").references(() => usersTable.id),
+  message: text("message").notNull(),
+  createdAt: timestamp("created_at", { precision: 3, mode: "string" })
+    .defaultNow()
+    .notNull(),
+});
+
 export const medicalInquiryRelations = relations(medicalInquiry, ({ one }) => ({
   doctor: one(doctorsTable, {
     fields: [medicalInquiry.doctorId],
