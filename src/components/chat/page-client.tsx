@@ -48,6 +48,8 @@ const ChatClient = ({ messages, senderId, recipientId }: Props) => {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
+          // if (payload.new.receiver_id !== recipientId) return;
+
           setMessagesList((prevMessages: any) => [
             ...prevMessages,
             {

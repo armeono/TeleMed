@@ -1,6 +1,6 @@
 import { db } from "@/db/drizzle";
 import { messages as messagesTable } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { MessagesDB } from "./types";
 import dayjs from "dayjs";
 
@@ -10,9 +10,15 @@ export const db_getMessagesBySenderAndRecipientId = async (
 ) => {
   try {
     const messages: MessagesDB[] = await db.query.messages.findMany({
-      where: and(
-        eq(messagesTable.senderId, senderId),
-        eq(messagesTable.receiverId, recipientId)
+      where: or(
+        and(
+          eq(messagesTable.receiverId, recipientId),
+          eq(messagesTable.senderId, senderId)
+        ),
+        and(
+          eq(messagesTable.senderId, recipientId),
+          eq(messagesTable.receiverId, senderId)
+        )
       ),
     });
 
