@@ -26,6 +26,9 @@ import {
 } from "@/components/ui/table";
 import { db_getPatientInfoById } from "@/server/data-access/patient";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { db_getDoctorInfo } from "@/server/data-access/doctor";
+import DoctorChat from "@/components/chat/doctor-chat";
 
 type Props = {
   params: {
@@ -34,6 +37,20 @@ type Props = {
 };
 
 export default async function PatientProfile({ params }: Props) {
+  const cookieStore = await cookies();
+
+  const userCookie: any = cookieStore.get("user")?.value!;
+
+  if (!userCookie) redirect("/login");
+
+  const parsedCookie = JSON.parse(userCookie);
+
+  if (!parsedCookie) redirect("/login");
+
+  const doctorInfo = await db_getDoctorInfo(parsedCookie.id!);
+
+  if (!doctorInfo) redirect("/login");
+
   const patientId = Number(params.id);
 
   const patient: any = await db_getPatientInfoById(patientId);
@@ -231,84 +248,16 @@ export default async function PatientProfile({ params }: Props) {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle>Communication</CardTitle>
+              <CardTitle>Chat with Doctor</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[300px] mb-4">
-                {[
-                  {
-                    id: 1,
-                    sender: "Dr. Smith",
-                    message: "How are you feeling today, Mr. Doe?",
-                    time: "10:00 AM",
-                  },
-                  {
-                    id: 2,
-                    sender: "John Doe",
-                    message:
-                      "I'm feeling much better, thank you. The new medication seems to be helping.",
-                    time: "10:05 AM",
-                  },
-                  {
-                    id: 3,
-                    sender: "Dr. Smith",
-                    message:
-                      "That's great to hear. Any side effects from the new medication?",
-                    time: "10:07 AM",
-                  },
-                  {
-                    id: 4,
-                    sender: "John Doe",
-                    message:
-                      "No side effects so far. My blood pressure readings have been more stable.",
-                    time: "10:10 AM",
-                  },
-                  {
-                    id: 5,
-                    sender: "Dr. Smith",
-                    message:
-                      "Excellent. Please continue to monitor and log your readings. We'll review them at your next appointment.",
-                    time: "10:12 AM",
-                  },
-                ].map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex flex-col ${
-                      message.sender === "John Doe"
-                        ? "items-end"
-                        : "items-start"
-                    } mb-4`}
-                  >
-                    <div
-                      className={`px-3 py-2 rounded-lg max-w-[80%] ${
-                        message.sender === "John Doe"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary"
-                      }`}
-                    >
-                      <p className="text-sm font-medium mb-1">
-                        {message.sender}
-                      </p>
-                      <p className="text-sm">{message.message}</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {message.time}
-                    </p>
-                  </div>
-                ))}
-              </ScrollArea>
-              <div className="flex items-center space-x-2">
-                <Textarea
-                  placeholder="Type your message..."
-                  className="flex-grow"
-                />
-                <Button size="icon">
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
+            <Separator />
+
+            <DoctorChat
+              senderId={doctorInfo.userId}
+              recipientId={patient.userId}
+            />
           </Card>
         </div>
       </div>

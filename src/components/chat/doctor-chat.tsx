@@ -6,10 +6,10 @@ type Props = {
   recipientId: number;
 };
 
-const Chat = async ({ senderId, recipientId }: Props) => {
+const DoctorChat = async ({ senderId, recipientId }: Props) => {
   const messages = await db_getMessagesBySenderAndRecipientId(
-    senderId,
-    recipientId
+    recipientId,
+    senderId
   );
 
   return (
@@ -21,4 +21,4 @@ const Chat = async ({ senderId, recipientId }: Props) => {
   );
 };
 
-export default Chat;
+export default DoctorChat;

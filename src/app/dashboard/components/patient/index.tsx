@@ -15,9 +15,9 @@ import {
 } from "@/server/data-access/appointments";
 import { db_getAvailableDoctors } from "@/server/data-access/doctor";
 import { redirect } from "next/navigation";
-import Chat from "@/app/chat/page";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import PatientChat from "@/components/chat/patient-chat";
 
 type Props = {
   user: UserDB;
@@ -118,7 +118,7 @@ export default async function PatientDashboard({ user }: Props) {
                 className="w-full"
                 key={availableDoctor.id}
               >
-                <Chat
+                <PatientChat
                   senderId={patient.user.id}
                   recipientId={availableDoctor.user.id}
                 />
