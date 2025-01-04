@@ -29,12 +29,12 @@ import { redirect } from "next/navigation";
 
 type Props = {
   params: {
-    id: Promise<{ id: string }>;
+    id: { id: string };
   };
 };
 
 export default async function PatientProfile({ params }: Props) {
-  const patientId = Number((await params).id);
+  const patientId = Number(params.id);
 
   const patient: any = await db_getPatientInfoById(patientId);
 
