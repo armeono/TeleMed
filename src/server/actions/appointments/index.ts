@@ -2,6 +2,8 @@
 
 import { db } from "@/db/drizzle";
 import { appointmentsTable } from "@/db/schema";
+import { headers } from "next/headers";
+import axios from "axios";
 
 export type ScheduleAppointment = {
   patientId: number;
@@ -19,6 +21,26 @@ export const action_scheduleAppointment = async (data: any) => {
     const [hours, minutes] = data.time.split(":").map(Number);
     appointmentDateTime.setHours(hours + 1, minutes, 0, 0);
 
+    let roomUrl: string | null = null;
+
+    if (data.type === "ONLINE") {
+      const dailyResponse = await axios.post(
+        `${process.env.DAILY_CO_API_URL}/rooms`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.DAILY_CO_API_KEY}`,
+          },
+        }
+      );
+
+      if (!dailyResponse.data.url) throw new Error("Failed to create room!");
+
+      console.log(dailyResponse);
+
+      roomUrl = dailyResponse.data.url;
+    }
+
     const response = await db.transaction(async (tx) => {
       const appointment = await tx
         .insert(appointmentsTable)
@@ -27,6 +49,7 @@ export const action_scheduleAppointment = async (data: any) => {
           patientId: data.patientId,
           doctorId: data.doctorId,
           appointmentTime: appointmentDateTime.toISOString(),
+          roomUrl: roomUrl,
           type: data.type,
         })
         .returning();

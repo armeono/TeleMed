@@ -231,6 +231,15 @@ export const appointmentsTable = pgTable("appointment", {
   type: appointmentTypeEnum(),
   status: appointmentStatusEnum(),
   feedback: text("feedback"),
+  questions: jsonb("questions")
+    .$type<
+      {
+        question: string;
+        answer: string;
+      }[]
+    >()
+    .default([]),
+  roomUrl: text("room_url"),
   reason: text("reason"),
   appointmentTime: timestamp("appointmentTime", {
     precision: 3,

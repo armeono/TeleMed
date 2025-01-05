@@ -7,14 +7,10 @@ type Props = {
 };
 
 const PatientChat = async ({ senderId, recipientId }: Props) => {
-  console.log("the ids here", senderId, recipientId);
-
   const messages = await db_getMessagesBySenderAndRecipientId(
     senderId,
     recipientId
   );
-
-  console.log(messages);
 
   return (
     <ChatClient

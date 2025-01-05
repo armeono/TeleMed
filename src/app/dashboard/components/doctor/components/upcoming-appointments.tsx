@@ -22,11 +22,14 @@ import {
   MoreVertical,
   PlusCircle,
   Video,
+  Link as LinkIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { DoctorAppointmentDB } from "@/server/data-access/appointments/types";
 import { DoctorDto } from "@/server/dto/doctor";
 import { Separator } from "@/components/ui/separator";
+import dayjs from "dayjs";
+import Link from "next/link";
 
 type Props = {
   appointments: DoctorAppointmentDB[];
@@ -34,9 +37,8 @@ type Props = {
 
 const PatientAppointments = ({ appointments }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<any | null>(
-    null
-  );
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<DoctorAppointmentDB | null>(null);
 
   const handleAppointmentClick = (appointment: any) => {
     setSelectedAppointment(appointment);
@@ -118,17 +120,27 @@ const PatientAppointments = ({ appointments }: Props) => {
                 <div className="grid grid-cols-4 items-center gap-4">
                   <span className="font-medium">Patient:</span>
                   <span className="col-span-3">
-                    {selectedAppointment.patientName}
+                    {selectedAppointment.patient.user.firstName +
+                      " " +
+                      selectedAppointment.patient.user.lastName}
                   </span>
                 </div>
                 <Separator />
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="col-span-3">{selectedAppointment.date}</span>
+                  <span className="col-span-3">
+                    {dayjs(selectedAppointment.appointmentTime).format(
+                      "MMMM D, YYYY"
+                    )}
+                  </span>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="col-span-3">{selectedAppointment.time}</span>
+                  <span className="col-span-3">
+                    {dayjs(selectedAppointment.appointmentTime).format(
+                      "h:mm A"
+                    )}
+                  </span>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   {selectedAppointment.type === "IN_PERSON" ? (
@@ -138,38 +150,33 @@ const PatientAppointments = ({ appointments }: Props) => {
                   )}
                   <span className="col-span-3">{selectedAppointment.type}</span>
                 </div>
+                {selectedAppointment.type === "ONLINE" ? (
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                    <Link
+                      href={selectedAppointment.roomUrl!}
+                      className="col-span-3 text-blue-500 underline"
+                    >
+                      Click here to join call
+                    </Link>
+                  </div>
+                ) : null}
                 <Separator />
                 <div className="grid grid-cols-4 items-center gap-4">
                   <AlertCircle className="h-4 w-4 text-muted-foreground" />
                   <span className="col-span-3">
-                    {selectedAppointment.reason}
+                    {selectedAppointment.reason ?? "No reason provided"}
                   </span>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <span className="font-medium">Status:</span>
-                  <Badge
-                    variant={
-                      selectedAppointment.status === "CRITICAL"
-                        ? "destructive"
-                        : "default"
-                    }
-                    className="col-span-3"
-                  >
-                    {selectedAppointment.status}
-                  </Badge>
-                </div>
               </div>
-              <DialogFooter className="sm:justify-start">
-                <Button variant="outline" onClick={() => setIsOpen(false)}>
-                  Close
-                </Button>
+              <div className="flex justify-between items-center">
                 <Button variant="destructive" onClick={handleCancelAppointment}>
                   Cancel Appointment
                 </Button>
                 <Button onClick={handleResolveAppointment}>
                   Resolve Appointment
                 </Button>
-              </DialogFooter>
+              </div>
             </>
           )}
         </DialogContent>
