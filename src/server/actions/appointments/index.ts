@@ -79,9 +79,22 @@ export const action_cancelAppointment = async (id: number) => {
       .set({
         status: "CANCELED",
       })
-      .where(eq(appointmentsTable.id, id));
+      .where(eq(appointmentsTable.id, id))
+      .returning();
 
     if (!response) throw new Error("Failed to cancel appointment!");
+
+    if (response[0].type === "ONLINE") {
+      const roomUrl = response[0].roomUrl;
+
+      const roomName = roomUrl!.split("https://telemed-ka.daily.co/")[1];
+
+      await axios.delete(`${process.env.DAILY_CO_API_URL}/rooms/${roomName}`, {
+        headers: {
+          Authorization: `Bearer ${process.env.DAILY_CO_API_KEY}`,
+        },
+      });
+    }
 
     return {
       status: "success",
@@ -104,9 +117,22 @@ export const action_resolveAppointment = async (id: number) => {
       .set({
         status: "COMPLETED",
       })
-      .where(eq(appointmentsTable.id, id));
+      .where(eq(appointmentsTable.id, id))
+      .returning();
 
     if (!response) throw new Error("Failed to resolve appointment!");
+
+    if (response[0].type === "ONLINE") {
+      const roomUrl = response[0].roomUrl;
+
+      const roomName = roomUrl!.split("https://telemed-ka.daily.co/")[1];
+
+      await axios.delete(`${process.env.DAILY_CO_API_URL}/rooms/${roomName}`, {
+        headers: {
+          Authorization: `Bearer ${process.env.DAILY_CO_API_KEY}`,
+        },
+      });
+    }
 
     return {
       status: "success",
