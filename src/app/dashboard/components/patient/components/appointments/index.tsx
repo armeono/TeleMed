@@ -33,6 +33,12 @@ import { DoctorDto } from "@/server/dto/doctor";
 import { Separator } from "@/components/ui/separator";
 import dayjs from "dayjs";
 import Link from "next/link";
+import {
+  action_cancelAppointment,
+  action_resolveAppointment,
+} from "@/server/actions/appointments";
+import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 type Props = {
   appointments: PatientAppointmentDB[];
@@ -45,6 +51,7 @@ const PatientAppointments = ({
   availableDoctors,
   patientId,
 }: Props) => {
+  const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -56,17 +63,25 @@ const PatientAppointments = ({
     setIsOpen(true);
   };
 
-  const handleCancelAppointment = () => {
-    // Implement cancellation logic here
-    console.log("Appointment cancelled:", selectedAppointment?.id);
+  const handleCancelAppointment = async (id: number) => {
+    const response = await action_cancelAppointment(id);
+
+    if (response.status === "error") {
+      toast({
+        title: "Failed to cancel appointment!",
+        description: response.message,
+      });
+    } else {
+      toast({
+        title: "Successfully canceled appointment!",
+        description: response.message,
+      });
+    }
+
+    router.refresh();
     setIsOpen(false);
   };
 
-  const handleResolveAppointment = () => {
-    // Implement resolution logic here
-    console.log("Appointment resolved:", selectedAppointment?.id);
-    setIsOpen(false);
-  };
   return (
     <Card>
       <CardHeader>
@@ -200,12 +215,11 @@ const PatientAppointments = ({
                 <div className="flex justify-between items-center">
                   <Button
                     variant="destructive"
-                    onClick={handleCancelAppointment}
+                    onClick={() =>
+                      handleCancelAppointment(selectedAppointment.id)
+                    }
                   >
                     Cancel Appointment
-                  </Button>
-                  <Button onClick={handleResolveAppointment}>
-                    Resolve Appointment
                   </Button>
                 </div>
               </>

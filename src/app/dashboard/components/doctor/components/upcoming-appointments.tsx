@@ -30,12 +30,19 @@ import { DoctorDto } from "@/server/dto/doctor";
 import { Separator } from "@/components/ui/separator";
 import dayjs from "dayjs";
 import Link from "next/link";
+import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import {
+  action_cancelAppointment,
+  action_resolveAppointment,
+} from "@/server/actions/appointments";
 
 type Props = {
   appointments: DoctorAppointmentDB[];
 };
 
 const PatientAppointments = ({ appointments }: Props) => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<DoctorAppointmentDB | null>(null);
@@ -45,15 +52,41 @@ const PatientAppointments = ({ appointments }: Props) => {
     setIsOpen(true);
   };
 
-  const handleCancelAppointment = () => {
-    // Implement cancellation logic here
-    console.log("Appointment cancelled:", selectedAppointment?.id);
+  const handleCancelAppointment = async (id: number) => {
+    const response = await action_cancelAppointment(id);
+
+    if (response.status === "error") {
+      toast({
+        title: "Failed to cancel appointment!",
+        description: response.message,
+      });
+    } else {
+      toast({
+        title: "Successfully canceled appointment!",
+        description: response.message,
+      });
+    }
+
+    router.refresh();
     setIsOpen(false);
   };
 
-  const handleResolveAppointment = () => {
-    // Implement resolution logic here
-    console.log("Appointment resolved:", selectedAppointment?.id);
+  const handleResolveAppointment = async (id: number) => {
+    const response = await action_resolveAppointment(id);
+
+    if (response.status === "error") {
+      toast({
+        title: "Failed to resolve appointment!",
+        description: response.message,
+      });
+    } else {
+      toast({
+        title: "Successfully resolved appointment!",
+        description: response.message,
+      });
+    }
+
+    router.refresh();
     setIsOpen(false);
   };
   return (
@@ -170,10 +203,19 @@ const PatientAppointments = ({ appointments }: Props) => {
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <Button variant="destructive" onClick={handleCancelAppointment}>
+                <Button
+                  variant="destructive"
+                  onClick={() =>
+                    handleCancelAppointment(selectedAppointment.id)
+                  }
+                >
                   Cancel Appointment
                 </Button>
-                <Button onClick={handleResolveAppointment}>
+                <Button
+                  onClick={() =>
+                    handleResolveAppointment(selectedAppointment.id)
+                  }
+                >
                   Resolve Appointment
                 </Button>
               </div>

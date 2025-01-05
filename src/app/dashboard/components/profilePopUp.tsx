@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { action_deleteCookie } from "@/server/utils/cookie";
 import { Bell } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 const ProfilePopUp = () => {
@@ -39,9 +40,11 @@ const ProfilePopUp = () => {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="hover:cursor-pointer">
-            Profile
-          </DropdownMenuItem>
+          <Link href={`/profile/patient`}>
+            <DropdownMenuItem className="hover:cursor-pointer">
+              Profile
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem className="hover:cursor-pointer">
             Settings
           </DropdownMenuItem>

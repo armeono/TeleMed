@@ -4,6 +4,7 @@ import { db } from "@/db/drizzle";
 import { appointmentsTable } from "@/db/schema";
 import { headers } from "next/headers";
 import axios from "axios";
+import { eq } from "drizzle-orm";
 
 export type ScheduleAppointment = {
   patientId: number;
@@ -36,8 +37,6 @@ export const action_scheduleAppointment = async (data: any) => {
 
       if (!dailyResponse.data.url) throw new Error("Failed to create room!");
 
-      console.log(dailyResponse);
-
       roomUrl = dailyResponse.data.url;
     }
 
@@ -69,6 +68,56 @@ export const action_scheduleAppointment = async (data: any) => {
     return {
       status: "error",
       message: "Failed to schedule appointment!",
+    };
+  }
+};
+
+export const action_cancelAppointment = async (id: number) => {
+  try {
+    const response = await db
+      .update(appointmentsTable)
+      .set({
+        status: "CANCELED",
+      })
+      .where(eq(appointmentsTable.id, id));
+
+    if (!response) throw new Error("Failed to cancel appointment!");
+
+    return {
+      status: "success",
+      message: "Appointment cancelled successfully!",
+    };
+  } catch (error) {
+    console.log(error);
+
+    return {
+      status: "error",
+      message: "Failed to cancel appointment!",
+    };
+  }
+};
+
+export const action_resolveAppointment = async (id: number) => {
+  try {
+    const response = await db
+      .update(appointmentsTable)
+      .set({
+        status: "COMPLETED",
+      })
+      .where(eq(appointmentsTable.id, id));
+
+    if (!response) throw new Error("Failed to resolve appointment!");
+
+    return {
+      status: "success",
+      message: "Appointment resolved successfully!",
+    };
+  } catch (error) {
+    console.log(error);
+
+    return {
+      status: "error",
+      message: "Failed to resolve appointment!",
     };
   }
 };

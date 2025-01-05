@@ -3,8 +3,9 @@
 import { db } from "@/db/drizzle";
 import { appointmentsTable } from "@/db/schema";
 import { toAppointmentDto } from "@/server/dto/appointment";
-import { and, eq, gte, lt } from "drizzle-orm";
+import { and, eq, gte, lt, or } from "drizzle-orm";
 import { generateTimeSlots } from "./utils";
+import { PatientAppointmentDB } from "./types";
 
 export const db_getPatientAppointments = async (patientId: number) => {
   try {
@@ -125,6 +126,41 @@ export const db_getDoctorAppointments = async (doctorId: number) => {
     return appointments.map((appointment) => toAppointmentDto(appointment));
   } catch (error) {
     console.log(error);
+    return [];
+  }
+};
+
+export const db_getPatientAppointmentHistory = async (patientId: number) => {
+  try {
+    const appointmentHistory = await db.query.appointmentsTable.findMany({
+      where: and(
+        eq(appointmentsTable.patientId, patientId),
+        or(
+          eq(appointmentsTable.status, "COMPLETED"),
+          eq(appointmentsTable.status, "CANCELED")
+        )
+      ),
+      with: {
+        doctor: {
+          with: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!appointmentHistory) {
+      return [];
+    }
+
+    return appointmentHistory.map((appointment) => {
+      return {
+        ...appointment,
+      };
+    });
+  } catch (error) {
+    console.log(error);
+
     return [];
   }
 };
