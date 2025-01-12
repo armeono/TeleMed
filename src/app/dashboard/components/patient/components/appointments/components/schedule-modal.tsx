@@ -56,8 +56,6 @@ export default function ScheduleModal({
       }
     };
 
-    console.log(availableTimeSlots);
-
     if (selectedDoctor && selectedDate) {
       fetchAvailableTimeSlots();
     }

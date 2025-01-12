@@ -230,6 +230,15 @@ export const appointmentsTable = pgTable("appointment", {
   doctorId: integer("doctor_id").references(() => doctorsTable.id),
   type: appointmentTypeEnum(),
   status: appointmentStatusEnum(),
+  symptoms: text("symptoms"), // New column for symptoms
+  uploadedFiles: jsonb("uploaded_files") // New column for file metadata
+    .$type<
+      {
+        fileName: string;
+        filePath: string;
+      }[]
+    >()
+    .default([]), // Default to an empty array
   feedback: text("feedback"),
   questions: jsonb("questions")
     .$type<
@@ -241,7 +250,7 @@ export const appointmentsTable = pgTable("appointment", {
     .default([]),
   roomUrl: text("room_url"),
   reason: text("reason"),
-  appointmentTime: timestamp("appointmentTime", {
+  appointmentTime: timestamp("appointment_time", {
     precision: 3,
     mode: "string",
   }).notNull(),
