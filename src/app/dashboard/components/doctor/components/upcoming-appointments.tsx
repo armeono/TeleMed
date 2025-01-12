@@ -115,7 +115,7 @@ const PatientAppointments = ({ appointments }: Props) => {
             selectedAppointment.patient.user.firstName +
             " " +
             selectedAppointment.patient.user.lastName,
-          jmbg: selectedAppointment.patient.jmbg ?? "No ID provided",
+          medicalId: selectedAppointment.patient.medicalId ?? "No ID provided",
           email: selectedAppointment.patient.user.email,
         }}
         doctor={{
