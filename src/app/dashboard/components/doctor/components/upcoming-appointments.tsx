@@ -37,17 +37,42 @@ import {
   action_cancelAppointment,
   action_resolveAppointment,
 } from "@/server/actions/appointments";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 
 type Props = {
   appointments: DoctorAppointmentDB[];
 };
 
+const formSchema = z.object({
+  feedback: z.string().min(1, "Feedback is required"),
+});
+
 const PatientAppointments = ({ appointments }: Props) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<DoctorAppointmentDB | null>(null);
+  const [feedbackSubmission, setFeedbackSubmission] = useState(false);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      feedback: "",
+    },
+  });
 
   const handleAppointmentClick = (appointment: any) => {
     setSelectedAppointment(appointment);
@@ -73,8 +98,13 @@ const PatientAppointments = ({ appointments }: Props) => {
     setIsOpen(false);
   };
 
-  const handleResolveAppointment = async (id: number) => {
-    const response = await action_resolveAppointment(id);
+  const onFormSubmit = async (formData: any) => {
+    if (!selectedAppointment) return;
+
+    const response = await action_resolveAppointment(
+      selectedAppointment.id,
+      formData.feedback
+    );
 
     if (response.status === "error") {
       toast({
@@ -91,6 +121,15 @@ const PatientAppointments = ({ appointments }: Props) => {
     router.refresh();
     setIsOpen(false);
   };
+
+  const handleResolveAppointment = async () => {
+    setFeedbackSubmission(true);
+  };
+
+  const goBack = () => {
+    setFeedbackSubmission(false);
+  };
+
   return (
     <div>
       <Card>
@@ -141,9 +180,16 @@ const PatientAppointments = ({ appointments }: Props) => {
         </CardContent>
       </Card>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={() => {
+          setIsOpen(false);
+
+          setFeedbackSubmission(false);
+        }}
+      >
         <DialogContent className="sm:max-w-[500px]">
-          {selectedAppointment && (
+          {!feedbackSubmission && selectedAppointment && (
             <>
               <DialogHeader>
                 <DialogTitle>Appointment Details</DialogTitle>
@@ -225,16 +271,54 @@ const PatientAppointments = ({ appointments }: Props) => {
                 >
                   Cancel Appointment
                 </Button>
-                <Button
-                  onClick={() =>
-                    handleResolveAppointment(selectedAppointment.id)
-                  }
-                >
+                <Button onClick={() => handleResolveAppointment()}>
                   Resolve Appointment
                 </Button>
               </div>
             </>
-          )}
+          )}{" "}
+          {feedbackSubmission && selectedAppointment ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Appointment Details</DialogTitle>
+                <DialogDescription>
+                  Please add feedback for the appointment below.
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onFormSubmit)}
+                  className="flex flex-col gap-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="feedback"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-semibold">
+                          Feedback
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Please enter feedback..."
+                            className="min-h-24 resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-between items-center">
+                    <Button variant="destructive" onClick={() => goBack()}>
+                      Back
+                    </Button>
+                    <Button type="submit">Submit</Button>
+                  </div>
+                </form>
+              </Form>
+            </>
+          ) : null}
         </DialogContent>
       </Dialog>
     </div>

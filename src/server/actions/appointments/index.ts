@@ -5,7 +5,8 @@ import { appointmentsTable } from "@/db/schema";
 import { headers } from "next/headers";
 import axios from "axios";
 import { eq } from "drizzle-orm";
-import { supabase } from "@/db/supabase-storage";
+import { supabase } from "@/db/supabase-storage";import { action_sendEmailAfterAppointment } from "../mail";
+
 export type ScheduleAppointment = {
   patientId: number;
   doctorId: number;
@@ -146,14 +147,36 @@ export const action_cancelAppointment = async (id: number) => {
   }
 };
 
-export const action_resolveAppointment = async (id: number) => {
+export const action_resolveAppointment = async (
+  id: number,
+  feedback: string
+) => {
   try {
+    const appointment = await db.query.appointmentsTable.findFirst({
+      where: eq(appointmentsTable.id, id),
+      with: {
+        patient: {
+          with: {
+            user: true,
+          },
+        },
+        doctor: {
+          with: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!appointment) throw new Error("Appointment not found!");
+
     const response = await db
       .update(appointmentsTable)
       .set({
         status: "COMPLETED",
+        feedback: feedback,
       })
-      .where(eq(appointmentsTable.id, id))
+      .where(eq(appointmentsTable.id, appointment.id))
       .returning();
 
     if (!response) throw new Error("Failed to resolve appointment!");
@@ -169,6 +192,12 @@ export const action_resolveAppointment = async (id: number) => {
         },
       });
     }
+
+    await action_sendEmailAfterAppointment({
+      doctorMail: appointment.doctor!.user.email,
+      patientMail: appointment.patient!.user.email,
+      feedback: feedback,
+    });
 
     return {
       status: "success",
