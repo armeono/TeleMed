@@ -15,6 +15,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   AlertCircle,
+  Image as ImageIcon,
   Calendar,
   Clock,
   Divide,
@@ -36,6 +37,7 @@ import {
   action_cancelAppointment,
   action_resolveAppointment,
 } from "@/server/actions/appointments";
+import Image from "next/image";
 
 type Props = {
   appointments: DoctorAppointmentDB[];
@@ -200,6 +202,18 @@ const PatientAppointments = ({ appointments }: Props) => {
                   <span className="col-span-3">
                     {selectedAppointment.reason ?? "No reason provided"}
                   </span>
+                </div>
+                <Separator />
+
+                <div className="w-full flex justify-between">
+
+                <ImageIcon  className="h-4 w-4 text-muted-foreground" />
+
+                <div className="flex w-full justify-center">
+                {selectedAppointment && selectedAppointment.uploadedFiles?.map((file: any, idx) => (
+                   <Image src={file.fileUrl} alt="Patient uploaded image" key={idx} width={400} height={200}/>
+                )) }
+                </div>
                 </div>
               </div>
               <div className="flex justify-between items-center">

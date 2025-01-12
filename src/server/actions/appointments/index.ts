@@ -5,7 +5,7 @@ import { appointmentsTable } from "@/db/schema";
 import { headers } from "next/headers";
 import axios from "axios";
 import { eq } from "drizzle-orm";
-
+import { supabase } from "@/db/supabase-storage";
 export type ScheduleAppointment = {
   patientId: number;
   doctorId: number;
@@ -13,9 +13,11 @@ export type ScheduleAppointment = {
   time: string;
   reason: string;
   type: "IN_PERSON" | "ONLINE";
+  symptoms?: string;
+  files?: File[];
 };
 
-export const action_scheduleAppointment = async (data: any) => {
+export const action_scheduleAppointment = async (data: ScheduleAppointment) => {
   try {
     const appointmentDateTime = new Date(data.date);
 
@@ -26,20 +28,51 @@ export const action_scheduleAppointment = async (data: any) => {
 
     if (data.type === "ONLINE") {
       const dailyResponse = await axios.post(
-        `${process.env.DAILY_CO_API_URL}/rooms`,
+        process.env.DAILY_CO_API_URL!,
         {},
         {
           headers: {
-            Authorization: `Bearer ${process.env.DAILY_CO_API_KEY}`,
+            Authorization: `Bearer ${process.env.DAILY_CO_API_KEY!}`,
           },
         }
       );
 
       if (!dailyResponse.data.url) throw new Error("Failed to create room!");
-
       roomUrl = dailyResponse.data.url;
     }
 
+    // Upload files to Supabase bucket
+    const uploadedFiles = await Promise.all(
+      (data.files || []).map(async (file) => {
+        const fileName = `${Date.now()}-${file.name}`;
+
+        try {
+          console.log(fileName);
+
+          const data = await supabase.storage
+            .from("appointment_patient_uploads")
+            .upload(fileName, file);
+
+          console.log(data);
+
+          if (data.error) {
+            console.error("Failed to upload file:", data.error.message);
+            throw new Error("Failed to upload file to Supabase storage.");
+          }
+
+          return {
+            fileName,
+            fileUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/appointment_patient_uploads/${fileName}`,
+          };
+        } catch (error) {
+          console.log(error);
+
+          throw new Error("Failed to upload file to Supabase storage.");
+        }
+      })
+    );
+
+    // Insert appointment into the database
     const response = await db.transaction(async (tx) => {
       const appointment = await tx
         .insert(appointmentsTable)
@@ -48,8 +81,11 @@ export const action_scheduleAppointment = async (data: any) => {
           patientId: data.patientId,
           doctorId: data.doctorId,
           appointmentTime: appointmentDateTime.toISOString(),
-          roomUrl: roomUrl,
+          roomUrl,
           type: data.type,
+          symptoms: data.symptoms || null,
+          uploadedFiles,
+          reason: data.reason,
         })
         .returning();
 
@@ -63,7 +99,7 @@ export const action_scheduleAppointment = async (data: any) => {
       message: "Appointment scheduled successfully!",
     };
   } catch (error) {
-    console.log(error);
+    console.error("Error scheduling appointment:", error);
 
     return {
       status: "error",
