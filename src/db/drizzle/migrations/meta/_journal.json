@@ -43,6 +43,13 @@
       "when": 1736089539605,
       "tag": "0005_tranquil_black_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1736684329854,
+      "tag": "0006_huge_wildside",
+      "breakpoints": true
     }
   ]
 }

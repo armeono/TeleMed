@@ -230,15 +230,16 @@ export const appointmentsTable = pgTable("appointment", {
   doctorId: integer("doctor_id").references(() => doctorsTable.id),
   type: appointmentTypeEnum(),
   status: appointmentStatusEnum(),
-  symptoms: text("symptoms"), // New column for symptoms
-  uploadedFiles: jsonb("uploaded_files") // New column for file metadata
-    .$type<
-      {
-        fileName: string;
-        filePath: string;
-      }[]
-    >()
-    .default([]), // Default to an empty array
+  symptoms: text("symptoms"),
+  uploadedFiles: jsonb("uploaded_files")
+  .$type<
+    {
+      fileName: string;
+      fileUrl: string;
+    }[]
+  >()
+  .default([]),
+
   feedback: text("feedback"),
   questions: jsonb("questions")
     .$type<
@@ -261,6 +262,7 @@ export const appointmentsTable = pgTable("appointment", {
     .defaultNow()
     .$onUpdate(() => new Date().toISOString()),
 });
+
 
 export const appointmentsRelations = relations(
   appointmentsTable,
