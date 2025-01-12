@@ -50,6 +50,13 @@
       "when": 1736684329854,
       "tag": "0006_huge_wildside",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1736702049363,
+      "tag": "0007_jittery_tusk",
+      "breakpoints": true
     }
   ]
 }

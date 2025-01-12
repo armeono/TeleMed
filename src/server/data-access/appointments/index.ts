@@ -116,6 +116,11 @@ export const db_getDoctorAppointments = async (doctorId: number) => {
             user: true,
           },
         },
+        doctor: {
+          with: {
+            user: true,
+          },
+        },
       },
     });
 

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Table,
   TableBody,
@@ -10,12 +12,25 @@ import { Badge } from "@/components/ui/badge";
 import { db_getPatientAppointmentHistory } from "@/server/data-access/appointments";
 import dayjs from "dayjs";
 import { PatientAppointmentDB } from "@/server/data-access/appointments/types";
+import Link from "next/link";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 type Props = {
   appointmentHistory: PatientAppointmentDB[];
 };
 
 export function AppointmentHistory({ appointmentHistory }: Props) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleDownload = (href: string) => {
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = `report-${new Date().toISOString()}.pdf`;
+    link.click();
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -23,7 +38,7 @@ export function AppointmentHistory({ appointmentHistory }: Props) {
           <TableRow>
             <TableHead>Date</TableHead>
             <TableHead>Doctor</TableHead>
-            <TableHead>Reason</TableHead>
+            <TableHead>Report</TableHead>
             <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
@@ -44,7 +59,19 @@ export function AppointmentHistory({ appointmentHistory }: Props) {
                     " " +
                     appointment.doctor?.user.lastName}
                 </TableCell>
-                <TableCell>{appointment.reason}</TableCell>
+                <TableCell>
+                  {appointment.reportUrl ? (
+                    <Button
+                      onClick={() =>
+                        handleDownload(appointment.reportUrl as string)
+                      }
+                    >
+                      Download
+                    </Button>
+                  ) : (
+                    <p>No report</p>
+                  )}
+                </TableCell>
                 <TableCell>
                   <Badge
                     variant={

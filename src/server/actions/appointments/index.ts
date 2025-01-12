@@ -7,6 +7,8 @@ import axios from "axios";
 import { eq } from "drizzle-orm";
 import { supabase } from "@/db/supabase-storage";
 import { action_sendEmailAfterAppointment } from "../mail";
+import { pdf, renderToString } from "@react-pdf/renderer";
+import MedicalReport from "@/lib/medical-report";
 
 export type ScheduleAppointment = {
   patientId: number;
@@ -144,9 +146,27 @@ export const action_cancelAppointment = async (id: number) => {
   }
 };
 
+const patient = {
+  name: "John Doe",
+  age: 32,
+  email: "john.doe@example.com",
+};
+
+const doctor = {
+  name: "Dr. Jane Smith",
+  specialization: "Cardiology",
+  email: "jane.smith@telemed.com",
+};
+
+const diagnosis =
+  "Mild hypertension with a recommendation for lifestyle changes.";
+const prescription =
+  "1. Amlodipine 5mg once daily\n2. Regular exercise (30 minutes/day)\n3. Follow-up in 1 month.";
+
 export const action_resolveAppointment = async (
   id: number,
-  feedback: string
+  feedback: string,
+  file: any
 ) => {
   try {
     const appointment = await db.query.appointmentsTable.findFirst({
@@ -167,11 +187,26 @@ export const action_resolveAppointment = async (
 
     if (!appointment) throw new Error("Appointment not found!");
 
+    const fileName = `${appointment.id}-${new Date().toISOString()}.pdf`;
+
+    const data = await supabase.storage
+      .from("appointment-reports")
+      .upload(fileName, file, {
+        duplex: "half",
+        contentType: "application/pdf",
+      });
+
+    if (data.error) {
+      console.log(data.error);
+      throw new Error("Failed to upload file to Supabase storage");
+    }
+
     const response = await db
       .update(appointmentsTable)
       .set({
         status: "COMPLETED",
         feedback: feedback,
+        reportUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/appointment-reports/${fileName}`,
       })
       .where(eq(appointmentsTable.id, appointment.id))
       .returning();

@@ -25,7 +25,7 @@ import {
   Video,
 } from "lucide-react";
 import ScheduleModal from "./components/schedule-modal";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
   DoctorAppointmentDB,
   PatientAppointmentDB,
@@ -41,6 +41,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
   appointments: PatientAppointmentDB[];
@@ -213,6 +214,9 @@ const PatientAppointments = ({
                       {selectedAppointment.reason ?? "No reason provided"}
                     </span>
                   </div>
+
+                  <Separator />
+
                   <div className="w-full flex justify-between">
                     <ImageIcon className="h-4 w-4 text-muted-foreground" />
 
@@ -220,13 +224,23 @@ const PatientAppointments = ({
                       {selectedAppointment &&
                         selectedAppointment.uploadedFiles?.map(
                           (file: any, idx) => (
-                            <Image
-                              src={file.fileUrl}
-                              alt="Patient uploaded image"
-                              key={idx}
-                              width={400}
-                              height={200}
-                            />
+                            <Suspense
+                              fallback={
+                                <Skeleton className="h-[200px] w-[400px] rounded-lg bg-muted animate-pulse" />
+                              }
+                            >
+                              {file.fileUrl ? (
+                                <Image
+                                  src={file.fileUrl}
+                                  alt="Patient uploaded image"
+                                  key={idx}
+                                  width={400}
+                                  height={200}
+                                />
+                              ) : (
+                                <p>No image provided</p>
+                              )}
+                            </Suspense>
                           )
                         )}
                     </div>

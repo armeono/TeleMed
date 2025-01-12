@@ -25,7 +25,7 @@ import {
   Video,
   Link as LinkIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { DoctorAppointmentDB } from "@/server/data-access/appointments/types";
 import { DoctorDto } from "@/server/dto/doctor";
 import { Separator } from "@/components/ui/separator";
@@ -51,6 +51,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
+import MedicalReport from "@/lib/medical-report";
+import { pdf } from "@react-pdf/renderer";
+import { supabase } from "@/db/supabase-storage";
 
 type Props = {
   appointments: DoctorAppointmentDB[];
@@ -59,6 +63,9 @@ type Props = {
 const formSchema = z.object({
   feedback: z.string().min(1, "Feedback is required"),
 });
+
+const prescription =
+  "1. Amlodipine 5mg once daily\n2. Regular exercise (30 minutes/day)\n3. Follow-up in 1 month.";
 
 const PatientAppointments = ({ appointments }: Props) => {
   const router = useRouter();
@@ -101,9 +108,34 @@ const PatientAppointments = ({ appointments }: Props) => {
   const onFormSubmit = async (formData: any) => {
     if (!selectedAppointment) return;
 
+    const blob = await pdf(
+      <MedicalReport
+        patient={{
+          name:
+            selectedAppointment.patient.user.firstName +
+            " " +
+            selectedAppointment.patient.user.lastName,
+          jmbg: selectedAppointment.patient.jmbg ?? "No ID provided",
+          email: selectedAppointment.patient.user.email,
+        }}
+        doctor={{
+          name:
+            selectedAppointment.doctor.user.firstName +
+            " " +
+            selectedAppointment.doctor.user.lastName,
+          specialization:
+            selectedAppointment.doctor.specialization ?? "INTERNAL_MEDICINE",
+          email: selectedAppointment.doctor.user.email,
+        }}
+        diagnosis={formData.feedback}
+        prescription={prescription}
+      />
+    ).toBuffer();
+
     const response = await action_resolveAppointment(
       selectedAppointment.id,
-      formData.feedback
+      formData.feedback,
+      blob
     );
 
     if (response.status === "error") {
@@ -252,14 +284,32 @@ const PatientAppointments = ({ appointments }: Props) => {
                 <Separator />
 
                 <div className="w-full flex justify-between">
+                  <ImageIcon className="h-4 w-4 text-muted-foreground" />
 
-                <ImageIcon  className="h-4 w-4 text-muted-foreground" />
-
-                <div className="flex w-full justify-center">
-                {selectedAppointment && selectedAppointment.uploadedFiles?.map((file: any, idx) => (
-                   <Image src={file.fileUrl} alt="Patient uploaded image" key={idx} width={400} height={200}/>
-                )) }
-                </div>
+                  <div className="flex w-full justify-center">
+                    {selectedAppointment &&
+                      selectedAppointment.uploadedFiles?.map(
+                        (file: any, idx) => (
+                          <Suspense
+                            fallback={
+                              <Skeleton className="h-[200px] w-[400px] rounded-lg bg-muted animate-pulse" />
+                            }
+                          >
+                            {file.fileUrl ? (
+                              <Image
+                                src={file.fileUrl}
+                                alt="Patient uploaded image"
+                                key={idx}
+                                width={400}
+                                height={200}
+                              />
+                            ) : (
+                              <p>No image provided</p>
+                            )}
+                          </Suspense>
+                        )
+                      )}
+                  </div>
                 </div>
               </div>
               <div className="flex justify-between items-center">

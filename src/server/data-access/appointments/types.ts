@@ -17,4 +17,7 @@ export type DoctorAppointmentDB = z.infer<typeof selectAppointmentSchema> & {
   patient: PatientDB & {
     user: UserDB;
   };
+  doctor: DoctorDB & {
+    user: UserDB;
+  };
 };

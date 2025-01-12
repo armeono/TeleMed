@@ -1,0 +1,1 @@
+ALTER TABLE "appointment" ADD COLUMN "report_url" text;
