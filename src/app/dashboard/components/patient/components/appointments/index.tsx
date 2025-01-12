@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Calendar,
   Clock,
+  Image as ImageIcon,
   Divide,
   Link as LinkIcon,
   MapPin,
@@ -39,6 +40,7 @@ import {
 } from "@/server/actions/appointments";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type Props = {
   appointments: PatientAppointmentDB[];
@@ -210,6 +212,24 @@ const PatientAppointments = ({
                     <span className="col-span-3">
                       {selectedAppointment.reason ?? "No reason provided"}
                     </span>
+                  </div>
+                  <div className="w-full flex justify-between">
+                    <ImageIcon className="h-4 w-4 text-muted-foreground" />
+
+                    <div className="flex w-full justify-center">
+                      {selectedAppointment &&
+                        selectedAppointment.uploadedFiles?.map(
+                          (file: any, idx) => (
+                            <Image
+                              src={file.fileUrl}
+                              alt="Patient uploaded image"
+                              key={idx}
+                              width={400}
+                              height={200}
+                            />
+                          )
+                        )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
