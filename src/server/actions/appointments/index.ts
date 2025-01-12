@@ -7,6 +7,7 @@ import axios from "axios";
 import { eq } from "drizzle-orm";
 import { supabase } from "@/db/supabase-storage";
 import { action_sendEmailAfterAppointment } from "../mail";
+import { action_sendEmailAfterAppointment_cancled } from "../mail/cancle";
 import { pdf, renderToString } from "@react-pdf/renderer";
 import MedicalReport from "@/lib/medical-report";
 
@@ -108,8 +109,65 @@ export const action_scheduleAppointment = async (data: ScheduleAppointment) => {
   }
 };
 
+// export const action_cancelAppointment = async (id: number) => {
+//   try {
+//     const response = await db
+//       .update(appointmentsTable)
+//       .set({
+//         status: "CANCELED",
+//       })
+//       .where(eq(appointmentsTable.id, id))
+//       .returning();
+
+//     if (!response) throw new Error("Failed to cancel appointment!");
+
+//     if (response[0].type === "ONLINE") {
+//       const roomUrl = response[0].roomUrl;
+
+//       const roomName = roomUrl!.split("https://telemed-ka.daily.co/")[1];
+
+//       await axios.delete(`${process.env.DAILY_CO_API_URL}/rooms/${roomName}`, {
+//         headers: {
+//           Authorization: `Bearer ${process.env.DAILY_CO_API_KEY}`,
+//         },
+//       });
+//     }
+
+//     return {
+//       status: "success",
+//       message: "Appointment cancelled successfully!",
+//     };
+//   } catch (error) {
+//     console.log(error);
+
+//     return {
+//       status: "error",
+//       message: "Failed to cancel appointment!",
+//     };
+//   }
+// };
+
 export const action_cancelAppointment = async (id: number) => {
   try {
+    const appointment = await db.query.appointmentsTable.findFirst({
+      where: eq(appointmentsTable.id, id),
+      with: {
+        patient: {
+          with: {
+            user: true,
+          },
+        },
+        doctor: {
+          with: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!appointment) throw new Error("Appointment not found!");
+
+    // Update the appointment status to "CANCELED"
     const response = await db
       .update(appointmentsTable)
       .set({
@@ -120,24 +178,33 @@ export const action_cancelAppointment = async (id: number) => {
 
     if (!response) throw new Error("Failed to cancel appointment!");
 
+    // If the appointment is an online appointment, delete the associated room
     if (response[0].type === "ONLINE") {
       const roomUrl = response[0].roomUrl;
 
-      const roomName = roomUrl!.split("https://telemed-ka.daily.co/")[1];
+      if (roomUrl) {
+        const roomName = roomUrl.split("https://telemed-ka.daily.co/")[1];
 
-      await axios.delete(`${process.env.DAILY_CO_API_URL}/rooms/${roomName}`, {
-        headers: {
-          Authorization: `Bearer ${process.env.DAILY_CO_API_KEY}`,
-        },
-      });
+        await axios.delete(`${process.env.DAILY_CO_API_URL}/rooms/${roomName}`, {
+          headers: {
+            Authorization: `Bearer ${process.env.DAILY_CO_API_KEY}`,
+          },
+        });
+      }
     }
+
+    // Send email notification to the doctor and patient
+    await action_sendEmailAfterAppointment_cancled({
+      doctorMail: appointment.doctor!.user.email,
+      patientMail: appointment.patient!.user.email,
+    });
 
     return {
       status: "success",
       message: "Appointment cancelled successfully!",
     };
   } catch (error) {
-    console.log(error);
+    console.error("Error canceling appointment:", error);
 
     return {
       status: "error",
@@ -145,6 +212,8 @@ export const action_cancelAppointment = async (id: number) => {
     };
   }
 };
+
+
 
 const patient = {
   name: "John Doe",
@@ -230,6 +299,7 @@ export const action_resolveAppointment = async (
       patientMail: appointment.patient!.user.email,
       feedback: feedback,
     });
+
 
     return {
       status: "success",

@@ -111,9 +111,10 @@ export const action_sendEmailAfterAppointment = async ({
               </div>
             </div>
           </div>
-          <div class="footer">
-            <p>Thank you for using TeleMed. For more information, visit <a href="https://telemed.com">our website</a>.</p>
-          </div>
+         <div class="footer">
+          <p>Thank you for using TeleMed. For more information, visit <a href="https://telemed.com">our website</a>.</p>
+          <img src="https://uverbfnoyutuywypfscl.supabase.co/storage/v1/object/public/Footer/footer.png" alt="Footer Image">
+        </div>
         </div>
       </body>
       </html>
