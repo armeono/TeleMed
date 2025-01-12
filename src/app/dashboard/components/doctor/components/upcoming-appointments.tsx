@@ -350,7 +350,7 @@ const PatientAppointments = ({ appointments }: Props) => {
                         </FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Please enter feedback..."
+                            placeholder="Please enter the medical feedback, and if neccesary create an outlined ℞ (Rx)"
                             className="min-h-24 resize-none"
                             {...field}
                           />
