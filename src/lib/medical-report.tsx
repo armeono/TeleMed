@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
 type Props = {
   patient: {
     name: string;
-    jmbg: string;
+    medicalId: string;
     email: string;
   };
   doctor: {
@@ -71,7 +71,7 @@ const MedicalReport = ({ patient, doctor, diagnosis, prescription }: Props) => (
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Medical Report</Text>
-        <Text style={styles.headerSubtitle}>Confidential Document</Text>
+        <Text style={styles.headerSubtitle}>Confidential , DO NOT SHARE</Text>
       </View>
 
       {/* Patient Details */}
@@ -82,7 +82,7 @@ const MedicalReport = ({ patient, doctor, diagnosis, prescription }: Props) => (
           <Text>{patient.name}</Text>
         </View>
         <View style={styles.field}>
-          <Text style={styles.fieldLabel}>ID:</Text> <Text>{patient.jmbg}</Text>
+          <Text style={styles.fieldLabel}>ID:</Text> <Text>{patient.medicalId}</Text>
         </View>
         <View style={styles.field}>
           <Text style={styles.fieldLabel}>Email:</Text>{" "}
@@ -109,14 +109,8 @@ const MedicalReport = ({ patient, doctor, diagnosis, prescription }: Props) => (
 
       {/* Diagnosis */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Diagnosis</Text>
+        <Text style={styles.sectionTitle}>Diagnosis and Prescription</Text>
         <Text>{diagnosis}</Text>
-      </View>
-
-      {/* Prescription */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Prescription</Text>
-        <Text>{prescription}</Text>
       </View>
 
       {/* Footer */}
