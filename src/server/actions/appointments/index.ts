@@ -5,7 +5,8 @@ import { appointmentsTable } from "@/db/schema";
 import { headers } from "next/headers";
 import axios from "axios";
 import { eq } from "drizzle-orm";
-import { supabase } from "@/db/supabase-storage";import { action_sendEmailAfterAppointment } from "../mail";
+import { supabase } from "@/db/supabase-storage";
+import { action_sendEmailAfterAppointment } from "../mail";
 
 export type ScheduleAppointment = {
   patientId: number;
@@ -48,13 +49,9 @@ export const action_scheduleAppointment = async (data: ScheduleAppointment) => {
         const fileName = `${Date.now()}-${file.name}`;
 
         try {
-          console.log(fileName);
-
           const data = await supabase.storage
             .from("appointment_patient_uploads")
             .upload(fileName, file);
-
-          console.log(data);
 
           if (data.error) {
             console.error("Failed to upload file:", data.error.message);
