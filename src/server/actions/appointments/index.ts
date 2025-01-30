@@ -31,8 +31,12 @@ export const action_scheduleAppointment = async (data: ScheduleAppointment) => {
     let roomUrl: string | null = null;
 
     if (data.type === "ONLINE") {
+      console.log(process.env.DAILY_CO_API_URL);
+      console.log(process.env.DAILY_CO_API_KEY);
+
+      console.log(data);
       const dailyResponse = await axios.post(
-        process.env.DAILY_CO_API_URL!,
+        `${process.env.DAILY_CO_API_URL!}/rooms`,
         {},
         {
           headers: {
@@ -40,6 +44,8 @@ export const action_scheduleAppointment = async (data: ScheduleAppointment) => {
           },
         }
       );
+
+      console.log(dailyResponse);
 
       if (!dailyResponse.data.url) throw new Error("Failed to create room!");
       roomUrl = dailyResponse.data.url;
