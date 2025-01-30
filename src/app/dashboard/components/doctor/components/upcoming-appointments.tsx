@@ -115,7 +115,7 @@ const PatientAppointments = ({ appointments }: Props) => {
             selectedAppointment.patient.user.firstName +
             " " +
             selectedAppointment.patient.user.lastName,
-          jmbg: selectedAppointment.patient.jmbg ?? "No ID provided",
+          medicalId: selectedAppointment.patient.medicalId ?? "No ID provided",
           email: selectedAppointment.patient.user.email,
         }}
         doctor={{
@@ -350,7 +350,7 @@ const PatientAppointments = ({ appointments }: Props) => {
                         </FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Please enter feedback..."
+                            placeholder="Please enter the medical feedback, and if neccesary create an outlined ℞ (Rx)"
                             className="min-h-24 resize-none"
                             {...field}
                           />
