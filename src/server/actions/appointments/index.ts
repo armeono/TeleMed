@@ -2,14 +2,11 @@
 
 import { db } from "@/db/drizzle";
 import { appointmentsTable } from "@/db/schema";
-import { headers } from "next/headers";
 import axios from "axios";
 import { eq } from "drizzle-orm";
 import { supabase } from "@/db/supabase-storage";
 import { action_sendEmailAfterAppointment } from "../mail";
 import { action_sendEmailAfterAppointment_cancled } from "../mail/cancle";
-import { pdf, renderToString } from "@react-pdf/renderer";
-import MedicalReport from "@/lib/medical-report";
 
 export type ScheduleAppointment = {
   patientId: number;
@@ -31,11 +28,9 @@ export const action_scheduleAppointment = async (data: ScheduleAppointment) => {
 
     let roomUrl: string | null = null;
 
-    if (data.type === "ONLINE") {
-      console.log(process.env.DAILY_CO_API_URL);
-      console.log(process.env.DAILY_CO_API_KEY);
+    console.log(data);
 
-      console.log(data);
+    if (data.type === "ONLINE") {
       const dailyResponse = await axios.post(
         `${process.env.DAILY_CO_API_URL!}/rooms`,
         {},
@@ -45,8 +40,6 @@ export const action_scheduleAppointment = async (data: ScheduleAppointment) => {
           },
         }
       );
-
-      console.log(dailyResponse);
 
       if (!dailyResponse.data.url) throw new Error("Failed to create room!");
       roomUrl = dailyResponse.data.url;
@@ -80,24 +73,20 @@ export const action_scheduleAppointment = async (data: ScheduleAppointment) => {
     );
 
     // Insert appointment into the database
-    const response = await db.transaction(async (tx) => {
-      const appointment = await tx
-        .insert(appointmentsTable)
-        .values({
-          status: "SCHEDULED",
-          patientId: data.patientId,
-          doctorId: data.doctorId,
-          appointmentTime: appointmentDateTime.toISOString(),
-          roomUrl,
-          type: data.type,
-          symptoms: data.symptoms || null,
-          uploadedFiles,
-          reason: data.reason,
-        })
-        .returning();
-
-      return appointment[0];
-    });
+    const response = await db
+      .insert(appointmentsTable)
+      .values({
+        status: "SCHEDULED",
+        patientId: data.patientId,
+        doctorId: data.doctorId,
+        appointmentTime: appointmentDateTime.toISOString(),
+        roomUrl,
+        type: data.type,
+        symptoms: data.symptoms || null,
+        uploadedFiles,
+        reason: data.reason,
+      })
+      .returning();
 
     if (!response) throw new Error("Failed to schedule appointment!");
 
@@ -191,11 +180,14 @@ export const action_cancelAppointment = async (id: number) => {
       if (roomUrl) {
         const roomName = roomUrl.split("https://telemed-ka.daily.co/")[1];
 
-        await axios.delete(`${process.env.DAILY_CO_API_URL}/rooms/${roomName}`, {
-          headers: {
-            Authorization: `Bearer ${process.env.DAILY_CO_API_KEY}`,
-          },
-        });
+        await axios.delete(
+          `${process.env.DAILY_CO_API_URL}/rooms/${roomName}`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.DAILY_CO_API_KEY}`,
+            },
+          }
+        );
       }
     }
 
@@ -218,8 +210,6 @@ export const action_cancelAppointment = async (id: number) => {
     };
   }
 };
-
-
 
 const patient = {
   name: "John Doe",
@@ -305,7 +295,6 @@ export const action_resolveAppointment = async (
       patientMail: appointment.patient!.user.email,
       feedback: feedback,
     });
-
 
     return {
       status: "success",
